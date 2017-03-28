@@ -181,13 +181,18 @@ volcano_plot <- function(data, title="Volcano Plot",
                             no = ifelse(data$fc < 0 & data$pvalue > ycutoff,
                                         yes = groups[2],
                                         no = "none")))
+    data$color <- as.factor(data$color)
+    ## This hack is needed for top_n to work properly during package build
+    data <- cbind(data$color, data)
+    data[,ncol(data)] <- NULL
+    colnames(data) <- c("color", "id", "fc", "pvalue")
 
     ## Color points by group
     colors <- c("#E64B35", "#3182bd", "#636363")
     names(colors) <- c(groups[1], groups[2], "none")
 
     fig <- fig +
-      geom_point(data=data, aes(x = fc, y = pvalue, color = factor(color)),
+      geom_point(data=data, aes_string(x = "fc", y = "pvalue", color = "color"),
                  size = 1.75, alpha = 0.8, na.rm = T) + # add gene points
       annotate(geom = "text",
                label = groups[1],
@@ -200,7 +205,7 @@ volcano_plot <- function(data, title="Volcano Plot",
       scale_color_manual(values = colors) # change colors
   } else {
     fig <- fig +
-      geom_point(data=data, aes(x = fc, y = pvalue),
+      geom_point(data=data, aes_string(x = "fc", y = "pvalue"),
                  size = 1.75, alpha = 0.8, na.rm = T) + # Make dots bigger
       scale_colour_gradient(low = "black", high = "black", guide = FALSE) # Color black
   }
@@ -211,10 +216,11 @@ volcano_plot <- function(data, title="Volcano Plot",
 
   ## Label top pvalue points by their id
   if (top_labeled > 0) {
-    top_labeled <- top_n(data, n = top_labeled, wt = pvalue)
+    # top_labeled <- top_n(data, n = top_labeled, wt = pvalue)
+    top_labeled <- top_n(data, n = top_labeled)
     fig <- fig +
       geom_text_repel(data = top_labeled,
-                      mapping = aes(x = fc, y = pvalue, label = id),
+                      mapping = aes_string(x = "fc", y = "pvalue", label = "id"),
                       size = 3,
                       fontface = 'bold',
                       color = 'black',
