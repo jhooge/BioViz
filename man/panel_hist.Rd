@@ -17,4 +17,7 @@ histogram with colored bars
 \description{
 Plot histogram into diagonal panel of a numeric vector
 }
+\author{
+Jens Hooge
+}
 

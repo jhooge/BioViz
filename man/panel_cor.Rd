@@ -26,4 +26,7 @@ plot text element
 Plot absolute correlation coefficients (pearson) into panel
 and adjust the text size according to the correlation
 }
+\author{
+Jens Hooge
+}
 

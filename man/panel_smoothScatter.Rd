@@ -31,4 +31,7 @@ smoothed scatter plot
 Plot a smoothScatter (color density of a scatter plot)
 with a loess fit.
 }
+\author{
+Jens Hooge
+}
 

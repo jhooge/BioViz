@@ -1,4 +1,6 @@
 #' Correlation Coefficients Panel
+#' 
+#' @author Jens Hooge
 #'
 #' @description
 #' Plot absolute correlation coefficients (pearson) into panel
@@ -27,6 +29,8 @@ panel_cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...) {
 
 
 #' Histogram Panel
+#' 
+#' @author Jens Hooge
 #'
 #' @description
 #' Plot histogram into diagonal panel of a numeric vector
@@ -47,6 +51,8 @@ panel_hist <- function(x, ...) {
 }
 
 #' Smooth Scatter Panel
+#' 
+#' @author Jens Hooge
 #'
 #' @description
 #' Plot a smoothScatter (color density of a scatter plot)
@@ -79,6 +85,8 @@ panel_smoothScatter <- function (x, y, bg = NA,
 
 
 #' Pairs Plot
+#' 
+#' @author Jens Hooge
 #'
 #' @description
 #' A matrix of plots is produced. The upper diagonal matrix
@@ -92,6 +100,8 @@ panel_smoothScatter <- function (x, y, bg = NA,
 #'
 #' @param mat A matrix or a dataframe with numerical columns
 #' @param ... Additional parameters
+#' 
+#' @seealso pairs
 #'
 #' @return Plots a pairs plot on screen
 #'
@@ -110,6 +120,8 @@ plot_pairs <- function(mat, ...) {
 
 
 #' Plots a volcano plot.
+#' 
+#' @author Jens Hooge
 #'
 #' @description
 #' The plot does not aim to show any details about which genes or
@@ -231,3 +243,357 @@ volcano_plot <- function(data, title="Volcano Plot",
 }
 
 
+#' Function to create a barplot, with bars split by a second variable
+#' 
+#' @author Sebastian Voss, Adam Skubala
+#'
+#' @param freq vector or matrix with the bar heights, e.g. a frequency table ('table()' output), 
+#'     names will be used for bar labels if 'labels' is not specified, if 'freq' is a matrix, 
+#'     entries of each column are represented by separate bars with no space in between
+#' @param labels bar labels (default=NULL)
+#' @param labels.ab additional labels, which are placed above the bars (default=NULL), should 
+#'     have the same dimension as 'freq'
+#' @param file.name name for the PNG output file (without '.png' ending)
+#' @param col color for the bars (default='tomato3'). can be a single value or an object of 
+#'     the same dimension than freq, specifying the color for each bar
+#' @param cex.lab size of the bar labels (default=1)
+#' @param cex.lab.ab size of the bar labels above the bars (default=1) 
+#' @param cex.x size of the x-labels (default=1)
+#' @param xlab label for the x-axis (default='')
+#' @param ylab label for the y-axis (default='Frequency')
+#' @param add.legend TRUE/FALSE should a legend be added underneath the plot (default=TRUE), 
+#'     only works if legend parameters are specified
+#' @param leg.lab labels for the legend (default=NULL)
+#' @param leg.col colors for the legend (default=NULL)
+#' @param leg.title title for the legend (default=NULL)
+#' @param mar plot margin (default=c(5,4,3,1))
+#' @param png.width width of the PNG-file in inches (default=6)
+#' @param png.height height of the PNG-file in inches (default=5)
+#' @param png.out TRUE/FALSE if true, a png file is created as output, otherwise the plot 
+#'     is created in the R graphic device
+#'
+#' @return PNG file with the barplot ('file.name.png') numeric vector with size of the PNG-file 
+#'     in inches for rescaling in RTF
+#' @export
+#'
+#' @examples
+#' set.seed(42)
+#' x <- sample(1:15, size=500, replace=TRUE)
+#' by <- sample(c('A','B'), size=500, replace=TRUE)
+#' freq <- table(by, x)
+#' col <- matrix(ncol=ncol(freq), nrow=nrow(freq))
+#' 
+#' col1 <- colorRampPalette(c('tomato3','grey95'))
+#' col[1,] <- col1(9)[1]
+#' col[2,] <- col1(9)[7]
+#' 
+#' col2 <- colorRampPalette(c('skyblue2','grey95'))
+#' col[1,c(5,11)] <- col2(9)[1]
+#' col[2,c(5,11)] <- col2(9)[7]
+#' 
+#' cex.lab <- 0.7
+#' cex.lab.ab <- 0.5
+#' cex.x <- 0.9
+#' labels <- NULL
+#' labels.ab <- rep(paste0('X', 1:15), each=2)
+#' labels.ab[which(1:length(labels.ab) %% 2 == 0)] <- ''
+#' mar <- c(7,4,3,1)
+#' xlab <- 'numbers'
+#' ylab <- 'frequencies'
+#' file.name <- 'test'
+#' png.width <- 7
+#' png.height <- 6
+#' add.legend <- TRUE
+#' leg.title <- 'color'
+#' leg.col <- c(col1(9)[1],col1(9)[7],col2(9)[1],col2(9)[7])
+#' leg.lab <- c('red','faded red','blue','faded blue')
+#' 
+#' bar_plot_by(freq=freq, labels=NULL, labels.ab=labels.ab, 
+#'     file.name='test1_barplot', col=col, cex.lab=0.7, cex.lab.ab=0.5, cex.x=0.8,
+#'       xlab='Number', ylab='Frequency', add.legend=TRUE, 
+#'       leg.lab=leg.lab, leg.col=leg.col, leg.title='color',
+#'       mar=c(7,4,3,1), png.width=7, png.height=6)
+#' bar_plot_by(freq=freq, labels=paste0('X', 1:15), labels.ab=NULL, 
+#'     file.name='test2_barplot', 
+#'     col=col, cex.lab=0.7, cex.lab.ab=0.5, cex.x=0.8,
+#'     xlab='Variable', ylab='Frequency', add.legend=TRUE, 
+#'     leg.lab=leg.lab, leg.col=leg.col, leg.title='color',
+#'     mar=c(7,4,3,1), png.width=7, png.height=6)
+#' bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
+#'     file.name='test3_barplot', col=col[2,5],
+#'       xlab='Number', ylab='Frequency')
+#' bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
+#'     file.name='test4_barplot', col=col[2,5], mar=c(7,4,3,1),
+#'     xlab='Number', ylab='Frequency', add.legend=TRUE, 
+#'     leg.title='color', leg.col=leg.col[4], leg.lab=leg.lab[4])
+bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
+                        xlab='', ylab='Frequency', add.legend=FALSE, leg.lab=NULL, leg.col=NULL, leg.title=NULL,
+                        mar=c(5,4,3,1), png.width=6, png.height=5, png.out=TRUE){ 
+  
+  #extract labels from 'freq' if 'labels' is not specified
+  if(is.null(labels)){
+    if(is.matrix(freq)){
+      labels <- colnames(freq)
+    }else{
+      labels <- names(freq)
+    }
+  }
+  
+  #define length of y-axis
+  if(is.null(labels.ab)){
+    ymax <- max(freq)
+  }else{
+    ymax <- 1.05*max(freq)
+  }
+  
+  #create bar plot
+  create.plot <- function(){
+    
+    #middle points of the bars, which will be added to the plot
+    bar.mp <- barplot(freq, plot=FALSE, beside=TRUE)
+    ##if 'freq' is a vector (no by variable specified), middle points are given as a matrix with one column,
+    ##whereas they are given as a matrix with one row for each bylevel, when 'freq' is a matrix
+    if (ncol(bar.mp)==1){
+      bar.mp <- t(bar.mp)
+    }
+    bar.mp.mp <- colMeans(bar.mp)
+    #set plot margins
+    par(mar=mar)
+    #empty plot
+    plot(0,0, xlim=c(min(bar.mp)-0.5,max(bar.mp)+0.5), ylim=c(0,ymax),
+         type='n', xlab='', ylab=ylab, main='', axes=FALSE)
+    #color background of the plotting region
+    rect(par('usr')[1], par('usr')[3],par('usr')[2],par('usr')[4], col='grey95')
+    #add customized axes with 45 degree labels on the x-axis
+    box()
+    axis(1, at=bar.mp.mp, labels=rep('',length(bar.mp.mp)), tcl=-0.3)
+    axis(2)
+    #add labels to the x-axis (45-degree angle)
+    y.text <- grconvertY(-0.04, from = 'npc', to = 'user') #y-coordinate for the labels
+    text(bar.mp.mp, y.text, labels=labels, xpd=TRUE, srt=-45, cex=cex.lab, adj=c(0,0.5))
+    #add bars
+    barplot(freq, add=TRUE, axes=FALSE, axisnames=FALSE, border=NA, col=col, beside=TRUE)
+    
+    #add labels above the bars
+    if(!is.null(labels.ab)){
+      text(bar.mp, freq+0.02*max(freq), labels=labels.ab, adj=c(0.5,0), cex=cex.lab.ab)
+    }
+    
+    ##add legend
+    if(add.legend==TRUE){
+      x.leg <- (par('usr')[1]+par('usr')[2])/2
+      y.leg <- grconvertY(0, from='ndc', to='user')
+      l <- legend(x.leg, y.leg, legend=leg.lab, fill=leg.col, border='white',
+                  xjust=0.5, yjust=0, title=leg.title, xpd=TRUE, horiz=FALSE, ncol=2,
+                  bty='n', cex=0.8)
+    }
+    
+    #add x-label
+    if(add.legend==TRUE){
+      text((par('usr')[1]+par('usr')[2])/2, l$rect$top, paste(xlab,'\n\n',sep=''), xpd=TRUE, cex=cex.x)
+    }else{
+      mtext(xlab, cex=cex.x, side=1, line=par('mar')[1]-2)
+    }
+    
+  }
+  
+  #PNG or standard R graphic device
+  if (png.out==TRUE){
+    size <- c(png.height,png.width)
+    names(size) <- c('height','width')
+    #create png-file
+    png(gsub(' ','_',paste(file.name,'.png',sep='')), height=size[1], width=size[2], units='in', res=300)
+    create.plot()
+    dev.off()
+    #return PNG size (useful for rescaling)
+    return(size)
+  }else{
+    create.plot()
+  }
+  
+}
+
+
+#' Function to create a simple barplot
+#'
+#' @author Sebastian Voss
+#'
+#' @param freq vector with the bar heights, e.g. a frequency table ('table()' output),
+#'     names will be used for bar labels if 'labels' is not specified
+#' @param labels bar labels (default=NULL)
+#' @param labels.ab additional labels, which are placed above the bars (default=NULL)
+#' @param file.name name for the PNG output file (without '.png' ending)
+#' @param col color for the bars (default='tomato3'). if more than one color is specified,
+#                 each bar is filled with the repsective color
+#' @param cex.lab size of the bar labels (default=1)
+#' @param cex.lab.ab size of the bar labels above the bars (default=1)
+#' @param cex.x size of the x-labels (default=1)
+#' @param xlab label for the x-axis (default='')
+#' @param ylab label for the y-axis (default='Frequency')
+#' @param add.legend 
+#' @param leg.lab labels for the legend (default=NULL)
+#' @param leg.col colors for the legend (default=NULL)
+#' @param leg.title title for the legend (default=NULL)
+#' @param mar plot margin (default=c(5,4,3,1))
+#' @param png.width width of the PNG-file in inches (default=6)
+#' @param png.height height of the PNG-file in inches (default=5)
+#'
+#' @return PNG file with the barplot ('file.name.png') and a 
+#'     numeric vector with size of the PNG-file in inches for rescaling in RTF
+#' @export
+#'
+#' @examples
+#' set.seed(42)
+#' x <- sample(1:30, size=500, replace=TRUE)
+#' freq <- table(x)
+#' 
+#' bar_plot_simple(freq, labels.ab=1:30, file.name="test", 
+#'                 col=rep(c('tomato3','tomato3','skyblue2'), 10), 
+#'                 cex.lab=.7, cex.lab.ab=.8, cex.x=.9,
+#'                 ylab="Bar Height", 
+#'                 add.legend=TRUE, leg.title="Color",
+#'                 leg.lab=c('red','blue'), leg.col=c('tomato3','skyblue2'),
+#'                 mar=c(4,4,3,1))
+bar_plot_simple <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
+                            xlab='', ylab='Frequency', add.legend=FALSE, leg.lab=NULL, leg.col=NULL, leg.title=NULL,
+                            mar=c(5,4,3,1), png.width=6, png.height=5){ 
+  
+  #extract labels from 'freq' if 'labels' is not specified
+  if(is.null(labels)){
+    labels <- names(freq)
+  }
+  
+  #define length of y-axis
+  if(is.null(labels.ab)){
+    ymax <- max(freq)
+  }else{
+    ymax <- 1.05*max(freq)
+  }
+  
+  #create bar plot
+  png(paste0(file.name,'.PNG'), width=png.width, height=png.height, units='in', res=300)
+  
+  #middle points of the bars, which will be added to the plot
+  bar.mp <- barplot(freq, plot=FALSE)
+  #set plot margins
+  par(mar=mar)
+  #empty plot
+  plot(0,0, xlim=c(min(bar.mp)-0.5,max(bar.mp)+0.5), ylim=c(0,ymax),
+       type='n', xlab='', ylab=ylab, main='', axes=FALSE)
+  #color background of the plotting region
+  rect(par('usr')[1], par('usr')[3],par('usr')[2],par('usr')[4], col='grey95')
+  #add customized axes with 45 degree labels on the x-axis
+  box()
+  axis(1, at=bar.mp, labels=rep('',length(bar.mp)), tcl=-0.3)
+  axis(2)
+  #add labels to the x-axis (45-degree angle)
+  y.text <- grconvertY(-0.04, from = 'npc', to = 'user') #y-coordinate for the labels
+  text(bar.mp, y.text, labels=labels, xpd=TRUE, srt=-45, cex=cex.lab, adj=c(0,0.5))
+  #add bars
+  barplot(freq, add=TRUE, axes=FALSE, axisnames=FALSE, border=NA, col=col)
+  
+  #add labels above the bars
+  if(!is.null(labels.ab)){
+    text(bar.mp, freq+0.02*max(freq), labels=labels.ab, adj=c(0.5,0), cex=cex.lab.ab)
+  }
+  
+  ##add legend
+  if(add.legend==TRUE){
+    x.leg <- (par('usr')[1]+par('usr')[2])/2
+    y.leg <- grconvertY(0, from='ndc', to='user')
+    l <- legend(x.leg, y.leg, legend=leg.lab, fill=leg.col, border='white',
+                xjust=0.5, yjust=0, title=leg.title, xpd=TRUE, horiz=FALSE,
+                bty='n', cex=0.8)
+  }
+  
+  #add x-label
+  if(add.legend==TRUE){
+    text((par('usr')[1]+par('usr')[2])/2, l$rect$top, paste(xlab,'\n\n',sep=''), xpd=TRUE, cex=cex.x)
+  }else{
+    mtext(xlab, cex=cex.x, side=1, line=par('mar')[1]-2)
+  }
+  
+  dev.off()
+  
+  #return PNG size (useful for importing plot into an RTF document)
+  size <- c(png.height,png.width)
+  names(size) <- c('height','width')
+  return(size)
+}
+
+
+n <- 500
+df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=T),
+                 B=sample(c("b1", "b2"), n, replace=T),
+                 C=sample(c("c1", "c2", "c3"), n, replace=T),
+                 D=sample(c("d1", "d2", "d3"), n, replace=T),
+                 value=log(rnorm(n, 100, 1)))
+
+library(reshape2)
+library(ggplot2)
+
+
+#' Function to create boxplots of a metric variable, grouped by two nominal variables
+#' 
+#' @author Jens Hooge
+#' 
+#' @import ggplot2
+#'
+#' @param data A data frame with group variables and a column with numeric values. (Required)
+#' @param group_by1 First grouping variable for which the plot will be facetted by. (Required)
+#' @param group_by2 Second grouping variable which defines the subgroup of group1 (Required)
+#' @param col.jitter_by The variable name by which the jitter points will be colored by. (Default: NULL)
+#' @param shape_jitter_by The variable name by which the jitter points will be shaped by. (Default: NULL)
+#' @param title The title of the plot (Default: NULL)
+#' @param xlab The x-axis label (Default: NULL)
+#' @param ylab The y-axis label (Default: NULL)
+#' @param legend Flag indicating whether the legend should be displayed (Default: FALSE)
+#' @param rotate Flag indicating whether the x-axis labels should be rotated by 45° (Default: FALSE)
+#'
+#' @return A ggplot figure
+#' @export
+#'
+#' @examples
+#' library(reshape2)
+#' n <- 500
+#' df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=T),
+#'                  B=sample(c("b1", "b2"), n, replace=T),
+#'                  C=sample(c("c1", "c2", "c3"), n, replace=T),
+#'                  D=sample(c("d1", "d2", "d3"), n, replace=T),
+#'                  value=log(rnorm(n, 100, 1)))
+#' 
+#' box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
+#'                   col.jitter_by = "A",
+#'                   shape_jitter_by = "C", rotate=T)
+box_plot_facetted <- function(data, group_by1, group_by2, 
+                              col.jitter_by=NULL, shape_jitter_by=NULL,
+                              title=NULL, xlab=NULL, ylab=NULL, legend=FALSE,
+                              rotate=FALSE) {
+  
+  ## Check Inputs
+  stopifnot(group_by1 %in% colnames(data),
+            group_by2 %in% colnames(data))
+  
+  facet <- paste0("~", group_by2)
+  fig <- ggplot(df, aes_string(x=group_by1, y="value")) + 
+    geom_boxplot(outlier.shape = NA) +
+    stat_boxplot(geom = "errorbar", width = 0.5, linetype="dashed") +
+    stat_summary(fun.y=mean, colour="black", geom="point", 
+                 shape=3, size=5, show.legend = FALSE) +
+    geom_jitter(aes_string(shape=shape_jitter_by, 
+                           col=col.jitter_by), alpha=.7) +
+    ggtitle(label = title) +
+    xlab(xlab) + 
+    ylab(ylab) + 
+    facet_grid(facet) + 
+    theme_bw()
+  
+  if(!legend) {
+    fig <- fig + theme(legend.position = "none") # remove legend
+  }
+  if(rotate) {
+    fig <- fig + theme(axis.text.x=element_text(angle=45, hjust=1))
+  }
+  
+  return(fig)
+}

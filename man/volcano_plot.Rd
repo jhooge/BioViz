@@ -48,4 +48,7 @@ volcano_plot(iPSC, groups=c("A", "B"))
 volcano_plot(iPSC, top_labeled=10, xcutoff=c(-log2(2), log2(4)))
 volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
 }
+\author{
+Jens Hooge
+}
 
