@@ -34,4 +34,5 @@ with a loess fit.
 \author{
 Jens Hooge
 }
+\keyword{internal}
 

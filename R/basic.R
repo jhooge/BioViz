@@ -8,6 +8,8 @@
 #'
 #' @import graphics
 #' @import stats
+#' 
+#' @keywords internal
 #'
 #' @param x numeric vector
 #' @param y numeric vector
@@ -36,6 +38,8 @@ panel_cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...) {
 #' Plot histogram into diagonal panel of a numeric vector
 #'
 #' @import graphics
+#' 
+#' @keywords internal
 #'
 #' @param x numeric vector
 #' @param ... Additional parameters
@@ -60,6 +64,8 @@ panel_hist <- function(x, ...) {
 #'
 #' @import graphics
 #' @import grDevices
+#' 
+#' @keywords internal
 #'
 #' @param x numeric vector
 #' @param y numeric vector
@@ -106,11 +112,13 @@ panel_smoothScatter <- function (x, y, bg = NA,
 #' @return Plots a pairs plot on screen
 #'
 #' @examples
+#' \dontrun{
 #' data(iris)
-#' plot_pairs(iris[, 1:4])
-#'
+#' general.plot_pairs(iris[, 1:4])
+#' }
+#' 
 #' @export
-plot_pairs <- function(mat, ...) {
+general.plot_pairs <- function(mat, ...) {
   pairs(mat,
        lower.panel = panel_smoothScatter,
        upper.panel = panel_cor,
@@ -151,12 +159,14 @@ plot_pairs <- function(mat, ...) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' data(iPSC)
-#' volcano_plot(iPSC)
-#' volcano_plot(iPSC, groups=c("A", "B"))
-#' volcano_plot(iPSC, top_labeled=10, xcutoff=c(-log2(2), log2(4)))
-#' volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
-volcano_plot <- function(data, title="Volcano Plot",
+#' general.volcano_plot(iPSC)
+#' general.volcano_plot(iPSC, groups=c("A", "B"))
+#' general.volcano_plot(iPSC, top_labeled=10, xcutoff=c(-log2(2), log2(4)))
+#' general.volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
+#' }
+general.volcano_plot <- function(data, title="Volcano Plot",
                                  groups=c("Untreated", "Treated"),
                                  top_labeled=0,
                                  xlabel=expression(log[2]("Foldchange")),
@@ -277,6 +287,7 @@ volcano_plot <- function(data, title="Volcano Plot",
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' x <- sample(1:15, size=500, replace=TRUE)
 #' by <- sample(c('A','B'), size=500, replace=TRUE)
@@ -308,25 +319,26 @@ volcano_plot <- function(data, title="Volcano Plot",
 #' leg.col <- c(col1(9)[1],col1(9)[7],col2(9)[1],col2(9)[7])
 #' leg.lab <- c('red','faded red','blue','faded blue')
 #' 
-#' bar_plot_by(freq=freq, labels=NULL, labels.ab=labels.ab, 
+#' general.bar_plot_by(freq=freq, labels=NULL, labels.ab=labels.ab, 
 #'     file.name='test1_barplot', col=col, cex.lab=0.7, cex.lab.ab=0.5, cex.x=0.8,
 #'       xlab='Number', ylab='Frequency', add.legend=TRUE, 
 #'       leg.lab=leg.lab, leg.col=leg.col, leg.title='color',
 #'       mar=c(7,4,3,1), png.width=7, png.height=6)
-#' bar_plot_by(freq=freq, labels=paste0('X', 1:15), labels.ab=NULL, 
+#' general.bar_plot_by(freq=freq, labels=paste0('X', 1:15), labels.ab=NULL, 
 #'     file.name='test2_barplot', 
 #'     col=col, cex.lab=0.7, cex.lab.ab=0.5, cex.x=0.8,
 #'     xlab='Variable', ylab='Frequency', add.legend=TRUE, 
 #'     leg.lab=leg.lab, leg.col=leg.col, leg.title='color',
 #'     mar=c(7,4,3,1), png.width=7, png.height=6)
-#' bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
+#' general.bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
 #'     file.name='test3_barplot', col=col[2,5],
 #'       xlab='Number', ylab='Frequency')
-#' bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
+#' general.bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15), 
 #'     file.name='test4_barplot', col=col[2,5], mar=c(7,4,3,1),
 #'     xlab='Number', ylab='Frequency', add.legend=TRUE, 
 #'     leg.title='color', leg.col=leg.col[4], leg.lab=leg.lab[4])
-bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
+#' }
+general.bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
                         xlab='', ylab='Frequency', add.legend=FALSE, leg.lab=NULL, leg.col=NULL, leg.title=NULL,
                         mar=c(5,4,3,1), png.width=6, png.height=5, png.out=TRUE){ 
   
@@ -443,18 +455,20 @@ bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomat
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' x <- sample(1:30, size=500, replace=TRUE)
 #' freq <- table(x)
 #' 
-#' bar_plot_simple(freq, labels.ab=1:30, file.name="test", 
+#' general.bar_plot_simple(freq, labels.ab=1:30, file.name="test", 
 #'                 col=rep(c('tomato3','tomato3','skyblue2'), 10), 
 #'                 cex.lab=.7, cex.lab.ab=.8, cex.x=.9,
 #'                 ylab="Bar Height", 
 #'                 add.legend=TRUE, leg.title="Color",
 #'                 leg.lab=c('red','blue'), leg.col=c('tomato3','skyblue2'),
 #'                 mar=c(4,4,3,1))
-bar_plot_simple <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
+#' }
+general.bar_plot_simple <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='tomato3', cex.lab=1, cex.lab.ab=1, cex.x=1,
                             xlab='', ylab='Frequency', add.legend=FALSE, leg.lab=NULL, leg.col=NULL, leg.title=NULL,
                             mar=c(5,4,3,1), png.width=6, png.height=5){ 
   
@@ -522,16 +536,6 @@ bar_plot_simple <- function(freq, labels=NULL, labels.ab=NULL, file.name, col='t
 }
 
 
-n <- 500
-df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=T),
-                 B=sample(c("b1", "b2"), n, replace=T),
-                 C=sample(c("c1", "c2", "c3"), n, replace=T),
-                 D=sample(c("d1", "d2", "d3"), n, replace=T),
-                 value=log(rnorm(n, 100, 1)))
-
-library(reshape2)
-library(ggplot2)
-
 
 #' Function to create boxplots of a metric variable, grouped by two nominal variables
 #' 
@@ -554,18 +558,20 @@ library(ggplot2)
 #' @export
 #'
 #' @examples
-#' library(reshape2)
+#' \dontrun{
+#' require(reshape2)
 #' n <- 500
-#' df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=T),
-#'                  B=sample(c("b1", "b2"), n, replace=T),
-#'                  C=sample(c("c1", "c2", "c3"), n, replace=T),
-#'                  D=sample(c("d1", "d2", "d3"), n, replace=T),
-#'                  value=log(rnorm(n, 100, 1)))
-#' 
-#' box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
-#'                   col.jitter_by = "A",
-#'                   shape_jitter_by = "C", rotate=T)
-box_plot_facetted <- function(data, group_by1, group_by2, 
+#' df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=TRUE),
+#'                  B=sample(c("b1", "b2"), n, replace=TRUE),
+#'                  C=sample(c("c1", "c2", "c3"), n, replace=TRUE),
+#'                  D=sample(c("d1", "d2", "d3"), n, replace=TRUE),
+#'                  value=rnorm(n, 100, 1))
+#'                  
+#' general.box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
+#'                   col.jitter_by = "A", shape_jitter_by = "C", 
+#'                   rotate=TRUE)
+#' }
+general.box_plot_facetted <- function(data, group_by1, group_by2, 
                               col.jitter_by=NULL, shape_jitter_by=NULL,
                               title=NULL, xlab=NULL, ylab=NULL, legend=FALSE,
                               rotate=FALSE) {
@@ -585,11 +591,11 @@ box_plot_facetted <- function(data, group_by1, group_by2,
     ggtitle(label = title) +
     xlab(xlab) + 
     ylab(ylab) + 
-    facet_grid(facet) + 
+    facet_grid(facet)
     theme_bw()
   
   if(!legend) {
-    fig <- fig + theme(legend.position = "none") # remove legend
+    fig <- fig + theme(legend.position = "none")
   }
   if(rotate) {
     fig <- fig + theme(axis.text.x=element_text(angle=45, hjust=1))
@@ -597,3 +603,15 @@ box_plot_facetted <- function(data, group_by1, group_by2,
   
   return(fig)
 }
+
+
+# n <- 500
+# df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=TRUE),
+#                  B=sample(c("b1", "b2"), n, replace=TRUE),
+#                  C=sample(c("c1", "c2", "c3"), n, replace=TRUE),
+#                  D=sample(c("d1", "d2", "d3"), n, replace=TRUE),
+#                  value=rnorm(n, 100, 1))
+# 
+# general.box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
+#                   col.jitter_by = "A", shape_jitter_by = "C", 
+#                   rotate=TRUE)
