@@ -14,6 +14,6 @@ timeseries.plot1 <- function() {
 #' @return Not implemented yet!
 #' @export
 
-timeseries.plot1 <- function() {
+timeseries.plot2 <- function() {
   stop("Not implemented yet!")
 }

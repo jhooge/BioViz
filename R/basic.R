@@ -1,3 +1,5 @@
+source("R/utils.R")
+
 #' Correlation Coefficients Panel
 #' 
 #' @author Jens Hooge
@@ -161,9 +163,16 @@ general.plot_pairs <- function(mat, ...) {
 #' @examples
 #' \dontrun{
 #' data(iPSC)
+#' ## Plot Simple Volcano Plot
 #' general.volcano_plot(iPSC)
+#' 
+#' ## Plot Simple Volcano Plot with Group Labels
 #' general.volcano_plot(iPSC, groups=c("A", "B"))
+#' 
+#' ## Plot Volcano Plot and add top10 most significant samples
 #' general.volcano_plot(iPSC, top_labeled=10, xcutoff=c(-log2(2), log2(4)))
+#' 
+#' ## Plot Volcano Plot and add Top10 most Significant Samples and Transform y-axis by log(1+x)
 #' general.volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
 #' }
 general.volcano_plot <- function(data, title="Volcano Plot",
@@ -428,7 +437,7 @@ general.bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, co
 
 #' Function to create a simple barplot
 #'
-#' @author Sebastian Voss
+#' @author Sebastian Voss, Adam Skubala
 #'
 #' @param freq vector with the bar heights, e.g. a frequency table ('table()' output),
 #'     names will be used for bar labels if 'labels' is not specified
@@ -536,7 +545,6 @@ general.bar_plot_simple <- function(freq, labels=NULL, labels.ab=NULL, file.name
 }
 
 
-
 #' Function to create boxplots of a metric variable, grouped by two nominal variables
 #' 
 #' @author Jens Hooge
@@ -605,13 +613,487 @@ general.box_plot_facetted <- function(data, group_by1, group_by2,
 }
 
 
-# n <- 500
-# df <- data.frame(A=sample(c("a1", "a2", "a3"), n, replace=TRUE),
-#                  B=sample(c("b1", "b2"), n, replace=TRUE),
-#                  C=sample(c("c1", "c2", "c3"), n, replace=TRUE),
-#                  D=sample(c("d1", "d2", "d3"), n, replace=TRUE),
-#                  value=rnorm(n, 100, 1))
-# 
-# general.box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
-#                   col.jitter_by = "A", shape_jitter_by = "C", 
-#                   rotate=TRUE)
+#' Function to create a correlation plot.
+#' 
+#' @author Sebastian Voss, Adam Skubala
+#' 
+#' @import ellipse
+#' 
+#' @description 
+#' The upper diagonale of the correlation matrix is visualized by colored ellipses,
+#' with the color, shape and direction of the ellipsis showing the dependence of
+#' the respective variable pair. the lower diagonale of the matrix-like plot
+#' contains the corresponding correlation values.
+#'
+#' @param data data set in wide format (Required)
+#' @param cor.type type of correlation coefficient, 'pearson', 'spearman' or 'kendall' (Default: 'spearman')
+#' @param col vector of length two with the colors for negative and positive correlations (Default: c('tomato1','green3'))
+#' @param plot.type plot type in the upper diagonale, 'ellipse' or 'points', i.e. scatterplots (Default='ellipse')
+#' @param size.cor 
+#' @param add.hist add histograms on the left hand side of the plot (Defaul=FALSE)
+#' @param disp.sig.lev ellipses of correlations with a p-value above this threshold will not be displayed
+#'     and the corresponding correlation number will be displayed in grey (Default: 1)
+#' @param disp.thresh ellipses of correlations with an absolute value below this threshold will not be displayed
+#      and the corresponding correlation number will be displayed in grey (Default: 0.1) 
+#' @param conf.level level for the confidence intervals (Does not work for 'kendall') (Default: Null) 
+#' @param n.boot number of bootstrap iterations, if confidence intervals for 'cor.type='spearman'' are calculated (Default: 1000)
+#' @param pt.size size of the points, if plot.type='points' (Default: 0.4)
+#' @param group.cut number of the last variable in the first group if variables can be split up into two groups,
+#      within group correlations will be faded out (Default: Null)
+#' @param border color of the border around the ellipses (Default: NA)
+#' @param png.out output as PNG? (Default: FALSE)
+#' @param png.width width of PNG in inches (Default: 5)
+#' @param png.height height of PNG in inches (Default: 5) 
+#' @param file.name filename of the PNG without '.png'
+#' @param ... Additional parameters for par()
+#'
+#' @return The correlation plot
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' data(mtcars)
+#' general.corplot(data=mtcars, cor.type='pearson', disp.sig.lev=0.05, group.cut=3)
+#' general.corplot(data=mtcars, cor.type='pearson', disp.sig.lev=0.05, cex=0.95)
+#' general.corplot(data=mtcars, cor.type='pearson', disp.sig.lev=0.05, group.cut=4, 
+#'                 conf.level=0.95, cex=0.95)
+#' general.corplot(data=mtcars, cor.type='pearson', disp.sig.lev=0.05, group.cut=4, 
+#'                 plot.type='points', conf.level=0.95, cex=0.95)
+#' general.corplot(data=mtcars, cor.type='pearson', disp.thresh=0.5, group.cut=4,
+#'                 plot.type='points', conf.level=0.95, cex=0.95, add.hist=TRUE)
+#' }
+general.corplot <- function(data, cor.type=c('pearson','spearman','kendall'), 
+                            col=c('tomato1','green3'), plot.type=c('ellipse','points'), 
+                            size.cor=1, add.hist=FALSE, disp.sig.lev=1, disp.thresh=0.1, 
+                            conf.level=NULL, n.boot=1000, pt.size=0.4, group.cut=NULL, border=NA,
+                            png.out=FALSE, png.width=5, png.height=5, file.name=NULL, ...) {
+  #check and recycle parameters
+  cor.type <- match.arg(cor.type)
+  plot.type <- match.arg(plot.type)
+  
+  #calculate correlation matrix
+  corm <- cor(data, method=cor.type, use='pairwise.complete.obs')
+  #also in text format, rounded to 2 digits
+  corm.text <- format(round(corm,2), nsmall=2)
+  
+  #create color gradient function for the specified colors
+  col.fun <- colorRamp(c(col[1],'white',col[2]), bias=1)
+  
+  #plot function
+  create.plot <- function(){
+    
+    #calculate margin size, based on par-settings and variable name lengths 
+    par(mar=c(0.5,0.5,0.5,0.5), ...)
+    ##string length
+    mar.var <- max(strwidth(colnames(data), units='inches'))
+    ##transfrom from inches to lines
+    mar.var <- mar.var*(par('mar')/par('mai'))[1] 
+    ##set margins
+    par(mar=c(0.5,1+mar.var+0.5,1+mar.var+0.5,0.5), ...)
+    #empty plot
+    plot(0,0, xlim=c(0.5,ncol(corm)+ifelse(add.hist,1.5,0)+0.5), ylim=c(-(nrow(corm)+0.5),-0.5), type='n',
+         axes=FALSE, xlab='', ylab='')
+    #background rectangle and grid lines
+    rect(0.5, -(nrow(corm)+0.5), ncol(corm)+ifelse(add.hist,1.5,0)+0.5, -0.5, col='grey95', border=NA)
+    abline(v=seq(0.5,ncol(corm)+0.5,1), col='white')
+    abline(h=seq(-(nrow(corm)+0.5),-0.5,1), col='white')
+    abline(0,-1, col='white', lwd=6)
+    #add histograms
+    if (add.hist==TRUE){
+      #separate histogram column from the rest by white rectangle
+      rect(ncol(corm)+0.5, -(nrow(corm)+0.5), ncol(corm)+0.5+0.5, -0.5, col='white', border=NA)
+      for (i in 1:ncol(data)){
+        #calculate histogram
+        hist.i <- hist(data[,i], plot=FALSE)
+        x <- hist.i$breaks
+        y <- c(0,hist.i$counts)
+        #transform into panel coordinates
+        tr.i <- utils.trafo_pan(x=x, y=y, pan.row=i, pan.col=ncol(corm)+1.5)
+        #add histogram into panel
+        rect(xleft=tr.i$xt[-length(tr.i$xt)], ybottom=rep(tr.i$yt[1],length(tr.i$yt)-1),
+             xright=tr.i$xt[-1], ytop=tr.i$yt[-1], col='grey60', border='grey95')
+      }
+    }
+    #add row- and column names
+    text(x=rep(0, ncol(data)), y=-(1:ncol(data)), labels=colnames(data), adj=c(1,0.5),
+         xpd=TRUE, cex=1*par('cex'))
+    text(x=1:ncol(data), y=rep(0, ncol(data)), labels=colnames(data), adj=c(0,0.5),
+         srt=90, xpd=TRUE, cex=1*par('cex'))
+    
+    #add ellipses and text for variables i and j
+    for (i in 1:(ncol(corm)-1)){
+      for (j in (i+1):nrow(corm)){
+        
+        #calculate p-value 
+        p.ij <- cor.test(data[,i], data[,j], method=cor.type, exact=ifelse(cor.type=='spearman',FALSE,TRUE))$p.value
+        #if correlation is significant and greater than the specified threshold, add ellipse in the upper triangle
+        if (p.ij<=disp.sig.lev & abs(corm[i,j])>=disp.thresh){
+          if(plot.type=='ellipse'){
+            ell <- ellipse(corm[i,j], t=0.4, npoints=1000)
+            ell[,1] <- ell[,1] + j
+            ell[,2] <- ell[,2] - i
+            polygon(ell, col=rgb(col.fun((corm[i,j]+1)/2), maxColorValue=255), border=border, lwd=0.5)
+          }else if(plot.type=='points'){
+            tr.ij <- utils.trafo_pan(x=data[,j], y=data[,i], pan.row=i, pan.col=j)
+            points(tr.ij$xt, tr.ij$yt, pch=20, cex=pt.size, col=rgb(col.fun((corm[i,j]+1)/2), maxColorValue=255))
+          }
+        }
+        #add correlation number (and confidence interval) in the lower triangle
+        
+        if(!is.null(conf.level) & cor.type!='kendall'){
+          
+          cor.height <- strheight(corm.text[i,j], cex=0.7*size.cor*par('cex'))
+          
+          segments(i, -j-2.25*cor.height/2, i, -j+2.25*cor.height/2, col='grey66', lwd=0.75)
+          segments(i-0.1, -j-2.25*cor.height/2, i+0.1, -j-2.25*cor.height/2, col='grey66', lwd=0.75)
+          segments(i-0.1, -j+2.25*cor.height/2, i+0.1, -j+2.25*cor.height/2, col='grey66', lwd=0.75)
+          
+          rect(i-0.45, -j-1.25*cor.height/2, i+0.45, -j+1.25*cor.height/2, col='grey95', border=NA)
+          
+          if (cor.type=='spearman'){
+            
+            set.seed(19121909)
+            cor.ci <- cor.ci(na.exclude(data[,c(i,j)]), n.iter=n.boot,  p=1-conf.level, method=cor.type, plot=FALSE)
+            ci.l <- format(round(cor.ci$ci$low.e, 2), nsmall=2)
+            ci.u <- format(round(cor.ci$ci$up.e, 2), nsmall=2)
+            
+          } else if (cor.type=='pearson'){
+            
+            cor.ci <- cor.test(data[,i], data[,j], method=cor.type, exact=TRUE, conf.level=conf.level)$conf.int
+            ci.l <- format(round(cor.ci[1], 2), nsmall=2)
+            ci.u <- format(round(cor.ci[2], 2), nsmall=2)
+            
+          }
+          
+          text(i,-j-2*cor.height/2, ci.l, adj=c(0.5, 1.5), cex=0.4*size.cor*par('cex'), col='grey66')
+          text(i,-j+2*cor.height/2, ci.u, adj=c(0.5,-0.5), cex=0.4*size.cor*par('cex'), col='grey66')
+          
+        } else if (!is.null(conf.level) & cor.type=='kendall'){
+          
+          message('no CI for cor.type=\'kendall\'')
+          
+        }
+        
+        text(i,-j, corm.text[i,j], adj=c(0.5,0.5), cex=0.7*size.cor*par('cex'),
+             col=ifelse(p.ij<=disp.sig.lev & abs(corm[i,j])>=disp.thresh,'black','grey50'))
+        
+        
+      }
+    }
+    
+    #if two groups are specified by a cutoff, the within group correlation matrix is faded out by a transparent rectangle
+    if (!is.null(group.cut)){
+      trans <- 0.75
+      rect(0.5, -(group.cut+0.5), group.cut+0.5, -0.5, col=adjustcolor('white', alpha.f=trans), border=NA)
+      rect(0.5+group.cut, -(nrow(corm)+0.5), ncol(corm)+0.5, -(0.5+group.cut), col=adjustcolor('white', alpha.f=trans), border=NA)
+    }
+    
+  }
+  
+  if (png.out==TRUE){
+    #output as PNG...
+    png(paste0(file.name,'.png'), height=png.height, width=png.width, units='in', res=600)
+    create.plot()
+    dev.off()
+    size <- c(png.height, png.width)
+    names(size) <- c('height','width')
+    invisible(size)
+  }else{
+    #...or in R device
+    create.plot()
+  }
+}
+
+
+#' Function to create histograms to check for the necessity of a log-transformation of metric data.
+#' 
+#' @author Sebastian Voss, Adam Skubala
+#' 
+#' @description 
+#' The function creates two histograms, one of the original data
+#' and one of the log-tramsformed data. If desired, a second time point can be added,
+#' so that a plot with four histograms is created.
+#'
+#' @param x Numeric vector (Required)
+#' @param file.name begining of the name for the PNG output files (without '.png' ending) (Required)
+#' @param by Character or factor vector of the same length than 'x' to 
+#'     the time, if two time points should be analyzed. should
+#'     contain only two levels (Default: Null)
+#' @param nbars number of bars for the histograms (Default: 15)
+#' @param title Title of the plot (Default: '')
+#' @param xlab Label for the x-axis (Default: '')
+#' @param col.orig Color of the histogram bars of the original values (Default: 'lightblue')
+#' @param col.log Color of the histogram bars of the log-transformed values (Default: 'lightyellow')
+#'
+#' @return A .png file with two or four histograms and a numeric vector
+#'     with the size of the .png
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' x <- exp(rnorm(1000))
+#' by <- factor(rep(c('baseline','day 30'), each=500), 
+#'              level=c('baseline','day 30'))
+#' general.hist_log(x=x, by=by, file.name='test_hist',
+#'          title='Test Historgram', xlab='Measurement')
+#' }
+general.hist_log <- function(x, by=NULL, file.name, nbars=15, title='', xlab='',
+                                        col.orig='lightblue', col.log='lightyellow'){
+  
+  #define some graphical parameters for the case of just one time point
+  height.png <- 8
+  png.row <- 1
+  oma3 <- 5
+  mar1 <- 10
+  xlab.log <- 'log. values'
+  if (xlab==''){
+    xlab <- 'orig. values'
+  }
+  #rename data vector
+  x1 <- x
+  if (!is.null(by)){
+    #change graphical parameters if two time points have to be analyzed
+    height.png <- 14
+    png.row <- 2
+    oma3 <- 7
+    mar1 <- 12
+    #convert 'by' into factor
+    by <- factor(by)
+    #split data vector
+    x1 <- x[by==levels(by)[1]]
+    x2 <- x[by==levels(by)[2]]
+  }
+  #create PNG
+  png(paste0(file.name,'.png'), width=14, height=height.png, units='in', res=300)
+  #set graphical parameters
+  par(mfrow=c(png.row,2), oma=c(1,0,oma3,0), mar=c(mar1,7,3,2), cex.lab=2, cex.axis=2,
+      cex.main=2, mgp=c(4.5,1.5,0))
+  
+  #create two histograms and add appropriate normal density
+  hist.data <- hist(x1, freq=TRUE, col=col.orig, xlab=xlab, ylab='frequency', main='',
+                    breaks=utils.exBar(x1,nbars))
+  #normal density is scaled to fit the frequency distribution
+  curve(sum(hist.data$count)*diff(hist.data$breaks)[1]*dnorm(x, mean(x1), sd(x1)),
+        from=min(x1), to=max(x1), add=TRUE, lty=2, lwd=2)
+  
+  hist.data <- hist(log(x1), freq=TRUE, col=col.log, xlab=xlab.log, ylab='frequency', main='',
+                    breaks=utils.exBar(log(x1),nbars))
+  curve(sum(hist.data$count)*diff(hist.data$breaks)[1]*dnorm(x, mean(log(x1)), sd(log(x1))),
+        from=log(min(x1)), to=log(max(x1)), add=TRUE, lty=2, lwd=2)
+  
+  #if a second time point is specified by 'by', add two more histograms + time labels
+  if (!is.null(by)){
+    
+    hist.data <- hist(x2, freq=TRUE, col=col.orig, xlab=xlab, ylab='frequency', main='',
+                      breaks=utils.exBar(x2,nbars))
+    curve(sum(hist.data$count)*diff(hist.data$breaks)[1]*dnorm(x, mean(x2), sd(x2)),
+          from=min(x2), to=max(x2), add=TRUE, lty=2, lwd=2)
+    
+    hist.data <- hist(log(x2), freq=TRUE, col=col.log, xlab=xlab.log, ylab='frequency', main='',
+                      breaks=utils.exBar(log(x2),nbars))
+    curve(sum(hist.data$count)*diff(hist.data$breaks)[1]*dnorm(x, mean(log(x2)), sd(log(x2))),
+          from=log(min(x2)), to=log(max(x2)), add=TRUE, lty=2, lwd=2)
+    
+    mtext(levels(by)[1], side=3, line=1, outer=TRUE, cex=2)  
+    mtext(levels(by)[2], side=3, line=-37, outer=TRUE, cex=2)
+    
+  }  
+  #add title and subtitle
+  mtext(title, side=3, line=oma3-3, outer=TRUE, font=2, cex=2.25)
+  mtext('----- rescaled density of normal distribution with appropriate mean and sd', side=1,
+        outer=TRUE, line=-2, cex=1.5)
+  
+  dev.off()
+  
+  #export size information to allow for convenient rescaling
+  size <- c(height.png,14)
+  names(size) <- c('height','width')
+  return(size)
+}
+
+
+#' Function to create scatterplots, color-coded by subgroups
+#' 
+#' @author Sebastian Voss, Adam Skubala
+#'
+#' @param x numeric vector (Required)
+#' @param y second numeric vector of the same length than 'x' (Required)
+#' @param by character or factor vector of the same length than 'x' to specify
+#'     by-groups used for color-coding (Default: Null)
+#' @param col.by colors for the 'by'-groups(Default: 1:length(unique(by)))
+#' @param name.by character, name of the 'by'-variable, used as legend-title
+#' @param mar margins of the plot as in 'par()' (Default: c(6,4,1,1))
+#' @param xlab character, labels for the x-axis (Default: '')
+#' @param ylab character, labels for the y-axis (Default: '')
+#' @param xlim Range of the x-axis (Default: Null)
+#' @param ylim Range of the y-axis (Default: Null)
+#' @param mark TODO: This parameter was not documented in original code (Default: Null)
+#' @param xlog TRUE/FALSE is x log-transformed? if yes, axis annotation will account for that (Default: FALSE)
+#' @param ylog TRUE/FALSE is y log-transformed? if yes, axis annotation will account for that (Default: FALSE)
+#' @param pch symbol for the jitter points (default=1, i.e. the same symbol for all points),
+#'     if at least as many symbols as the number of levels of the 'by.col' variable are given,
+#'     symbol coding is used in addition to color coding. (Default: 1)
+#' @param cex.pch size of the points (Default: 0.75) 
+#' @param add.reg TRUE/FALSE if true, adds a regression line (Default: FALSE)
+#' @param add.mean TODO: This parameter was not documented in original code (Default: FALSE)
+#' @param add.leg TRUE/FALSE if true and 'by' is specified, a legend is added to the plot (Default: TRUE)
+#' @param cex.mean TODO: This parameter was not documented in original code (Default: 1)
+#' @param file.name name for the PNG output file (without '.png' ending) (Default: NULL)
+#' @param png.out TRUE/FALSE if true, a png file is created as output, otherwise
+#'     the plot is created in the R graphic device (Default: TRUE)
+#' @param png.width width of PNG file in inches (Default: 6)
+#' @param png.height height of PNG file in inches (Default: 5)
+#' @param ... Additional parameters for par()
+#'
+#' @return PNG files with the scatterplot ('file.name.png')
+#'     numeric vector with size of the PNG-file in inches for rescaling in RTF
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' set.seed(42)
+#' x <- rnorm(500)
+#' y <- x^2+rnorm(500)
+#' by <- factor(c(rep('male', 250),
+#'                rep('female',250)),
+#'              levels=c('male','female'))
+#' 
+#' general.scatter_by(x, y, by=by, col.by=c('skyblue','tomato'), name.by="Sex",
+#'                    xlab="Sex", ylab="Biomarker", file.name="test", add.reg=TRUE,
+#'                    mar=c(7,4,4,2), xlim=range(x), ylim=range(y), 
+#'                    pch <- c(1, 4), xlog=TRUE, add.mean=TRUE)
+#' }
+general.scatter_by <- function(x, y, by=NULL, col.by=1:length(unique(by)), name.by='', mar=c(6,4,2,1),
+                       xlab='', ylab='', xlim=NULL, ylim=NULL, mark=NULL,
+                       xlog=FALSE, ylog=FALSE, pch=1, cex.pch=0.75, add.reg=FALSE, add.mean=FALSE, add.leg=TRUE,
+                       cex.mean=1, file.name=NULL, png.out=TRUE, png.width=6, png.height=5, ...){
+  
+  #delete all observations with at least one NA
+  data <- cbind.data.frame(x, y)
+  if (!is.null(by)){
+    data <- cbind.data.frame(data, factor(by))
+  }
+  data <- na.exclude(data)
+  x <- data[,1]
+  y <- data[,2]
+  if (!is.null(by)){
+    by <- data[,3]
+  }
+  
+  #create scatterplot
+  ##plot function
+  create.plot <- function(){
+    
+    #if a by-variable is specified, a legend is added to the plot
+    #-> bottom margin has to be bigger
+    if (!is.null(by) & add.leg==TRUE){
+      mar[1] <- mar[1]+0.5+0.25*length(levels(by))  
+    }
+    par(mar=mar, ...)
+    #empty plot
+    plot(0,0, type='n', xlim=xlim, ylim=ylim, main='', ylab='', xlab='', axes=FALSE)
+    #color background of the plotting region
+    rect(par('usr')[1], par('usr')[3],par('usr')[2],par('usr')[4], col='grey95')
+    #add axis and box
+    if (xlog==FALSE){
+      axis(1)
+    }else{
+      axis(1, at=axTicks(1), labels=format(round(exp(axTicks(1)),2),nsmall=2))
+    }
+    if (ylog==FALSE){
+      axis(2)
+    }else{
+      axis(2, at=axTicks(2), labels=format(round(exp(axTicks(2)),2),nsmall=2))
+    }
+    box()
+    #color for points
+    if (!is.null(by)){
+      col.points <- col.by[as.numeric(by)]
+    }else{
+      col.points <- col.by[1]
+    }
+    #if at least as many symbols are given in 'pch' than the number of levels of the color variable,
+    #use symbol coding in addition to color coding
+    if (!is.null(by) & length(pch)>=length(levels(by))){
+      pch.by <- pch[as.numeric(by)]
+      #else use just the first symbol in 'pch'
+    }else{
+      pch.by <- pch[1] #for plot
+      pch <- rep(pch[1], length(levels(by))) #for legend
+    }
+    
+    #add vertical and horizontal line if mean for overall mean
+    if (add.mean==TRUE & is.null(mark)){
+      abline(v=mean(x), lty=2, col='grey66')
+      abline(h=mean(y), lty=2, col='grey66')
+    }else if(!is.null(mark)){
+      abline(v=ifelse(xlog==TRUE, log(mark[1]), mark[1]), lty=2, col='grey66')
+      abline(h=ifelse(ylog==TRUE, log(mark[2]), mark[2]), lty=2, col='grey66')
+    }
+    
+    #add points
+    points(x,y, col=col.points, cex=cex.pch, pch=pch.by)
+    
+    #add means (crosses)
+    if (add.mean==TRUE){
+      #points(mean(x), mean(y), col='grey66', cex=6.5*cex.mean, pch=3, lwd=3)
+      if(!is.null(by)){
+        mby.x <- as.vector(by(x, INDICES=by, FUN=mean))
+        mby.y <- as.vector(by(y, INDICES=by, FUN=mean))
+        points(mby.x, mby.y, col=col.by, cex=5*cex.mean, pch=3, lwd=2.5)
+      }
+    }
+    
+    #add regression line
+    if (add.reg==TRUE){
+      fit <- lm(y~x)
+      x.str <- ifelse(xlog==TRUE, 'log(x)','x')
+      y.str <- ifelse(ylog==TRUE, 'log(y)','y')
+      reg.label1 <- paste0('Regression line: ',y.str,' = ',format(round(summary(fit)$coef[1,1],2), nsmall=2))
+      reg.label2 <- ifelse(summary(fit)$coef[2,1]>=0,paste0(' + ',format(round(summary(fit)$coef[2,1],2), nsmall=2),' ',x.str),
+                           paste0(' - ',format(round(-summary(fit)$coef[2,1],2), nsmall=2),' ',x.str))
+      reg.label3 <- paste0('\n(Pearson cor. = ',format(round(cor(x,y,method='p'),2),nsmall=2),', Spearman cor. = ',format(round(cor(x,y, method='s'),2),nsmall=2),', n = ',nrow(data),')')
+      reg.label <- paste0(reg.label1, reg.label2)
+      
+      mtext(reg.label, side=3, line=par('mar')[3]-1.5, cex=0.8*par('cex'))
+      mtext(reg.label3, side=3, line=par('mar')[3]-2.5, cex=0.8*par('cex'))
+      
+      abline(fit, col='grey40', lwd=2.5, lty=3)
+      
+    }
+    
+    #add legend, if 'by' is specified
+    if (!is.null(by) & add.leg==TRUE){
+      x.leg <- (par('usr')[1]+par('usr')[2])/2
+      y.leg <- grconvertY(0, from='ndc', to='user')
+      l <- legend(x.leg, y.leg, legend=levels(as.factor(by)), pch=pch[1:length(by)],
+                  col=col.by, xjust=0.5, yjust=0,
+                  title=name.by, xpd=TRUE, horiz=FALSE, bty='n', cex=0.8*par('cex'), ncol=2)
+      #add x-label 
+      text((par('usr')[1]+par('usr')[2])/2, l$rect$top, paste(xlab,'\n\n',sep=''), xpd=TRUE, cex=1*par('cex'))
+    }else{
+      #add x-label 
+      mtext(xlab, cex=1*par('cex'), side=1, line=par('mar')[1]-2)
+    }
+    #add y-label 
+    mtext(ylab, cex=1*par('cex'), side=2, line=par('mar')[2]-1)
+    
+  }
+  
+  #PNG or standard R graphic device
+  if (png.out==TRUE){
+    
+    png(paste0(file.name,'.png'), width=png.width, height=png.height, units='in', res=300)
+    create.plot()
+    dev.off()
+    #return PNG size (useful for importing plot into an RTF document)
+    size <- c(png.height, png.width)
+    names(size) <- c('height','width')
+    return(size)
+    
+  }else{
+    
+    create.plot()
+    
+  }
+}

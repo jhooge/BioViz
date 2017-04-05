@@ -44,9 +44,16 @@ as the x-axis and its (log2) fold change as the y-axis.
 \examples{
 \dontrun{
 data(iPSC)
+## Plot Simple Volcano Plot
 general.volcano_plot(iPSC)
+
+## Plot Simple Volcano Plot with Group Labels
 general.volcano_plot(iPSC, groups=c("A", "B"))
+
+## Plot Volcano Plot and add top10 most significant samples
 general.volcano_plot(iPSC, top_labeled=10, xcutoff=c(-log2(2), log2(4)))
+
+## Plot Volcano Plot and add Top10 most Significant Samples and Transform y-axis by log(1+x)
 general.volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
 }
 }

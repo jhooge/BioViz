@@ -69,6 +69,6 @@ general.bar_plot_simple(freq, labels.ab=1:30, file.name="test",
 }
 }
 \author{
-Sebastian Voss
+Sebastian Voss, Adam Skubala
 }
 
