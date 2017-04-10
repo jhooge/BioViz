@@ -33,7 +33,7 @@ general.corplot(data=mtcars, cor.type=’pearson’,
                 conf.level=0.95, cex=0.95, add.hist=TRUE)
 ```
 
-![](README-example-1.png)
+![](figs/README-example-1.png)
 
 If you are using an IDE (like RStudio), which provides code completion, this way of accessing is highly convenient.
 By typing the function category and a “.” the respective IDE will show each of the functions available within this category.
