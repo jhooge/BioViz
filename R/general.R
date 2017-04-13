@@ -451,7 +451,8 @@ general.bar_plot_by <- function(freq, labels=NULL, labels.ab=NULL, file.name, co
 #' @param cex.x size of the x-labels (default=1)
 #' @param xlab label for the x-axis (default='')
 #' @param ylab label for the y-axis (default='Frequency')
-#' @param add.legend 
+#' @param add.legend TRUE/FALSE should a legend be added underneath the plot 
+#'                   only works if legend parameters are specified (default=TRUE)
 #' @param leg.lab labels for the legend (default=NULL)
 #' @param leg.col colors for the legend (default=NULL)
 #' @param leg.title title for the legend (default=NULL)
@@ -629,7 +630,7 @@ general.box_plot_facetted <- function(data, group_by1, group_by2,
 #' @param cor.type type of correlation coefficient, 'pearson', 'spearman' or 'kendall' (Default: 'spearman')
 #' @param col vector of length two with the colors for negative and positive correlations (Default: c('tomato1','green3'))
 #' @param plot.type plot type in the upper diagonale, 'ellipse' or 'points', i.e. scatterplots (Default='ellipse')
-#' @param size.cor 
+#' @param size.cor text size of the correlation numbers (Default: 1)
 #' @param add.hist add histograms on the left hand side of the plot (Defaul=FALSE)
 #' @param disp.sig.lev ellipses of correlations with a p-value above this threshold will not be displayed
 #'     and the corresponding correlation number will be displayed in grey (Default: 1)
@@ -641,6 +642,7 @@ general.box_plot_facetted <- function(data, group_by1, group_by2,
 #' @param group.cut number of the last variable in the first group if variables can be split up into two groups,
 #      within group correlations will be faded out (Default: Null)
 #' @param border color of the border around the ellipses (Default: NA)
+#'
 #' @param png.out output as PNG? (Default: FALSE)
 #' @param png.width width of PNG in inches (Default: 5)
 #' @param png.height height of PNG in inches (Default: 5) 
@@ -1097,3 +1099,149 @@ general.scatter_by <- function(x, y, by=NULL, col.by=1:length(unique(by)), name.
     
   }
 }
+
+
+
+#' Custom geom for general.lineplot
+#'
+#' @keywords internal
+#'
+#' @seealso ggplot2::layer
+#'
+#' @param mapping Set of aesthetic mappings created by aes or aes_. 
+#'                If specified and inherit.aes = TRUE (the default), 
+#'                it is combined with the default mapping at the top 
+#'                level of the plot. You must supply mapping if there 
+#'                is no plot mapping.
+#' @param data The data to be displayed in this layer. There are three options: 
+#'             If NULL, the default, the data is inherited from the plot data as 
+#'             specified in the call to ggplot. 
+#'             A data.frame, or other object, will override the plot data. 
+#'             All objects will be fortified to produce a data frame. See fortify 
+#'             for which variables will be created. 
+#'             A function will be called with a single argument, the plot data. 
+#'             The return value must be a data.frame., and will be used as the layer data.
+#' @param var.type The way the variability region is displayed (e.g. 'errorbars' or 'ribbon')
+#' @param stat The statistical transformation to use on the data for this layer, as a string.
+#' @param position Position adjustment, either as a string, or the result of a call to a position 
+#'                 adjustment function. 
+#' @param na.rm If FALSE, the default, missing values are removed with a warning. 
+#'              If TRUE, missing values are silently removed.
+#' @param show.legend logical. Should this layer be included in the legends? 
+#'                    NA, the default, includes if any aesthetics are mapped. 
+#'                    FALSE never includes, and TRUE always includes.
+#' @param inherit.aes If FALSE, overrides the default aesthetics, rather than combining with them. 
+#'                    This is most useful for helper functions that define both data and aesthetics 
+#'                    and shouldn't inherit behaviour from the default plot specification, e.g. borders.
+#' @param ... other arguments passed on to layer. These are often aesthetics, used to set an 
+#'            aesthetic to a fixed value, like color = "red" or size = 3. They may also be parameters to the 
+#'            paired geom/stat.
+#'
+#' @return ggplot2 layer
+geom_variability <- function(mapping = NULL, data = NULL, var.type=c("errorbar", "ribbon"), stat = "identity", position = "identity",
+                             na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...) {
+  
+  geom <- geom_errorbar(mapping, data = data,
+                        stat = stat, position = position,
+                        na.rm = na.rm, show.legend = show.legend, inherit.aes = inherit.aes, 
+                        width=0.2, ...)
+  if (var.type=="ribbon") {
+    geom <- geom_ribbon(mapping, data = data,
+                        stat = stat, position = position,
+                        na.rm = na.rm, show.legend = show.legend, inherit.aes = inherit.aes, 
+                        alpha=0.3, ...)
+  }
+  return(geom)
+}
+
+
+#' Function generate (non-)facetted lineplot
+#'
+#' @param data A data frame in long format (Required)
+#' @param by Variable the plot should be facetted by (Default: NULL)
+#' @param facet.rows Number of rows in which the facets should be displayed. (Default: 1)
+#' @param upper.err Upper bound width on errorbars or ribbon variability region (Default: 1)
+#' @param lower.err Lower bound width on errorbars or ribbon variability region (Default: 1)
+#' @param var.type Type of how to display variability ("errorbar", "ribbon") (Default: "errorbar")
+#' @param title Title of the plot (Default: NULL)
+#' @param xlab x-axis label (Default: NULL)
+#' @param ylab y-axis label (Default: NULL)
+#' @param xlim Upper and lower limit (e.g. c(0, 10)) of x-axis (Default: NULL)
+#' @param ylim Upper and lower limit (e.g. c(0, 10)) of y-axis (Default: NULL)
+#' @param legend.position Position of the legend ("none", "left", "right", "top", "bottom") (Default: "left")
+#' @param size Point Size (Default: 3)
+#' @param x.log10trans Logical flag for log10 x-axis trasformation
+#' @param y.log10trans Logical flag for log10 y-axis trasformation
+#'
+#' @return a ggplot2 plot
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(reshape2)
+#' library(ggplot2)
+#' n=7
+#' df <- data.frame(Dose1=exp((1/2)*1:n),
+#'                  Dose2=exp((1/3)*1:n),
+#'                  Dose3=exp((1/4)*1:n),
+#'                  Dose4=exp((1/5)*1:n),
+#'                  Dose5=exp((1/6)*1:n),
+#'                  Dose6=exp((1/7)*1:n),
+#'                  Visit=1:n)
+#' df <- melt(df, id=c("Visit"))
+#' colnames(df) <- c("Visit", "Dose", "Measure") 
+#' 
+#' general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar")
+#' general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar", y.log10trans = T)
+#' general.lineplot(df, by="Dose", facet.row=3, upper.err=1, lower.err=1, 
+#'                  var.type="errorbar", y.log10trans = T)
+#' general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon")
+#' general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon", y.log10trans = T)
+#' }
+general.lineplot <- function(data, by=NULL, facet.rows=1,
+                             upper.err, lower.err, 
+                             var.type=c("errorbar", "ribbon"), 
+                             title=NULL, xlab=NULL, ylab=NULL,
+                             xlim=NULL, ylim=NULL,
+                             legend.position="right", size=3,
+                             x.log10trans=FALSE, y.log10trans=FALSE) {
+  
+  # Define the top and bottom of the errorbars
+  fig <- ggplot(data, aes(data$Visit, data$Measure)) +
+    
+    geom_point(aes(col=data$Dose), size=size) +
+    geom_line(aes(col=data$Dose)) + 
+    geom_variability(aes(ymax = data$Measure+upper.err, ymin=data$Measure-lower.err, 
+                         col=data$Dose, fill=data$Dose), var.type = var.type) +
+    ggtitle(label = title) +
+    xlab(xlab) + 
+    ylab(ylab) +
+    theme_bw() +
+    theme(legend.position=legend.position)
+  
+  
+  if(!is.null(by)) {
+    stopifnot(by %in% colnames(data))
+    facet <- as.formula(paste0("~", by))
+    fig <- fig + facet_wrap(facet, scales = "free", nrow=facet.rows)
+  }
+  if(!is.null(xlim)) {
+    fig <- fig + xlim(xlim)
+  }
+  if(!is.null(ylim)) {
+    fig <- fig + ylim(ylim)
+  }
+  if(x.log10trans) {
+    fig <- fig + scale_x_log10()
+  }
+  if(y.log10trans) {
+    fig <- fig + scale_y_log10()
+  }
+  
+  return(fig)
+}
+
+
+
+
+

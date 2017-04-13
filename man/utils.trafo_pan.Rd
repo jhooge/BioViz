@@ -23,5 +23,8 @@ A list of transformed x and y variables
 \description{
 Function to transform x and y coordinates
 }
+\author{
+Sebastian Voss, Adam Skubala
+}
 \keyword{internal}
 

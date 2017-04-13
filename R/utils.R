@@ -3,6 +3,8 @@
 
 #' Function to transform x and y coordinates
 #' 
+#' @author Sebastian Voss, Adam Skubala
+#' 
 #' @keywords internal
 #'
 #' @param x x coordinate
@@ -25,9 +27,9 @@ utils.trafo_pan <- function(x, y, pan.row, pan.col, prop.fill=0.85){
 }
 
 
-#function to dictate the exact number of bars in a histogram
-
 #' Function to dictate the exact number of bars in a histogram
+#' 
+#' @author Sebastian Voss, Adam Skubala
 #' 
 #' @keywords internal
 #'
@@ -38,4 +40,26 @@ utils.trafo_pan <- function(x, y, pan.row, pan.col, prop.fill=0.85){
 utils.exBar <- function(data, nbars){
   #create breaks
   return(seq(min(data), max(data), length.out=nbars+1))
+}
+
+
+#' Function for position dodging in a plot
+#' 
+#' @author Sebastian Voss, Adam Skubala
+#'  
+#' @keywords internal
+#'
+#' @param x a numeric vector with repeated entries (each with frequency n) (Required)
+#' @param width width for the distribution of equal entries in 'x' (Default: 0.1)
+#'
+#' @return a numeric vector of the same length with no equal entries, equal entries
+#          of the original vector are distributed evenly over an interval with length
+utils.pos_dodge <- function(x, width=0.1){
+  x <- as.numeric(x)
+  x.freq <- table(x)
+  dodge <- seq(-width/2,width/2, length.out=x.freq[1])
+  for (i in unique(x)){
+    x[x==i] <- x[x==i]+dodge
+  }
+  return(x)
 }

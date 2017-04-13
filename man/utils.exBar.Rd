@@ -17,5 +17,8 @@ A numeric vector of breaks
 \description{
 Function to dictate the exact number of bars in a histogram
 }
+\author{
+Sebastian Voss, Adam Skubala
+}
 \keyword{internal}
 
