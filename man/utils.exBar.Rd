@@ -18,4 +18,3 @@ A numeric vector of breaks
 Function to dictate the exact number of bars in a histogram
 }
 \keyword{internal}
-

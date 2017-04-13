@@ -24,4 +24,3 @@ A list of transformed x and y variables
 Function to transform x and y coordinates
 }
 \keyword{internal}
-
