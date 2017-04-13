@@ -1100,8 +1100,6 @@ general.scatter_by <- function(x, y, by=NULL, col.by=1:length(unique(by)), name.
   }
 }
 
-
-
 #' Custom geom for general.lineplot
 #'
 #' @keywords internal
@@ -1237,11 +1235,178 @@ general.lineplot <- function(data, by=NULL, facet.rows=1,
   if(y.log10trans) {
     fig <- fig + scale_y_log10()
   }
-  
   return(fig)
 }
 
 
 
+#' Function to generate a facetted scatter plot
+#' 
+#' @author Jens Hooge
+#'
+#' @keywords internal
+#'
+#' @param data A dataframe with at least three columns (x,y and a facetting variable) (Required)
+#' @param by Grouping variable (Required)
+#' @param fun Function for statistical aggregation function (Default: "mean") 
+#' @param smooth.fun Smoothing method (function) to use, eg. "lm", "glm", "gam", "loess", "rlm". (Default: "auto")
+#'                   For method = "auto" the smoothing method is chosen based on the size of the largest group 
+#'                   (across all panels). loess is used for less than 1,000 observations; otherwise gam is used with 
+#'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
+#'                   but is O(n^2) in memory, so does not work for larger datasets.
+#' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param title Plot Title (Default: NULL)
+#' @param xlab x-axis label (Default: NULL)
+#' @param ylab y-axis label (Default: NULL)
+#' @param legend.pos (Default: "none")
+#' 
+#' @return ggplot2 figure
+general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                                     title=NULL, xlab=NULL, ylab=NULL,
+                                     legend.pos="none") {
+  xagg <- aggregate(cbind(data$x, data$y), by=list(data[, by]), fun)
+  colnames(xagg) <- c(by, paste0("x.", fun), paste0("y.", fun))
+  data <- left_join(data, xagg, by)
+  
+  facet <- paste0("~", by)
+  fig <- ggplot(data, aes_string(x=data$x, y=data$y, color=by)) + 
+      geom_point() +
+      geom_point(aes_string(x=paste0("x.", fun), y=paste0("y.", fun)), 
+                 shape=3, size=18, show.legend = FALSE) +
+      geom_smooth(method=smooth.fun, formula = smooth.formula) +
+      facet_grid(facet) +
+      ggtitle(label = title) +
+      xlab(xlab) + 
+      ylab(ylab) + 
+      theme_bw() +
+      theme(legend.position = legend.pos)
+  return(fig)
+}
 
+#' Function to generate a simple scatter plot
+#' 
+#' @author Jens Hooge
+#'
+#' @keywords internal
+#'
+#' @param data A dataframe with at least three columns (x,y and a facetting variable) (Required)
+#' @param by Grouping variable (Default: NULL)
+#' @param fun Function for statistical aggregation function (Default: "mean") 
+#' @param smooth.fun Smoothing method (function) to use, eg. "lm", "glm", "gam", "loess", "rlm". (Default: "auto")
+#'                   For method = "auto" the smoothing method is chosen based on the size of the largest group 
+#'                   (across all panels). loess is used for less than 1,000 observations; otherwise gam is used with 
+#'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
+#'                   but is O(n^2) in memory, so does not work for larger datasets.
+#' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param title Plot Title (Default: NULL)
+#' @param xlab x-axis label (Default: NULL)
+#' @param ylab y-axis label (Default: NULL)
+#' @param legend.pos (Default: "none")
+#' 
+#' @return ggplot2 figure
+general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                                   title=NULL, xlab=NULL, ylab=NULL,
+                                   legend.pos="none") {
+  xagg <- apply(data[, c("x", "y")], 2, fun, na.rm=T)
+  xagg <- data.frame(rep(xagg[1], nrow(data)),
+                     rep(xagg[2], nrow(data)))
+  colnames(xagg) <- c(paste0("x.", fun), paste0("y.", fun))
+  
+  data <- cbind(data, xagg)
+  
+  fig <- ggplot(data, aes_string(x=data$x, y=data$y)) + 
+    geom_point() +
+    geom_point(aes_string(x=paste0("x.", fun), y=paste0("y.", fun)), 
+               shape=3, size=18, show.legend = FALSE) +
+    geom_smooth(method=smooth.fun, formula = smooth.formula) +
+    ggtitle(label = title) +
+    xlab(xlab) + 
+    ylab(ylab) + 
+    theme_bw() +
+    theme(legend.position = legend.pos)
+  return(fig)
+}
 
+#' Function factory to generate a scatter plots
+#'
+#' @author Jens Hooge
+#'
+#' @description 
+#' Depending on the grouping variable 'by', this function factory generates
+#' either an ungrouped (by=NULL) or a grouped scatterplot (by=<grouping_variable>).
+#' This function provides the option for different regression fits, based on an inbuilt
+#' smooth function or a custom model, defined by smooth.formula.
+#'
+#' 
+#'
+#' @param data A dataframe with at least three columns (x,y and a facetting variable) (Required)
+#' @param by Grouping variable (Required)
+#' @param fun Function for statistical aggregation function (Default: "mean") 
+#' @param smooth.fun Smoothing method (function) to use, eg. "lm", "glm", "gam", "loess", "rlm". (Default: "auto")
+#'                   For method = "auto" the smoothing method is chosen based on the size of the largest group 
+#'                   (across all panels). loess is used for less than 1,000 observations; otherwise gam is used with 
+#'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
+#'                   but is O(n^2) in memory, so does not work for larger datasets.
+#' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param title Plot Title (Default: NULL)
+#' @param xlab x-axis label (Default: NULL)
+#' @param ylab y-axis label (Default: NULL)
+#' @param legend.pos (Default: "none")
+#'
+#' @return ggplot2 figure
+#' @export
+#' 
+#' @examples
+#' \dontrun{
+#' df <- data.frame(x=x, y=y, 
+#'                  A=sample(c("a1", "a2"), 500, replace = TRUE),
+#'                  B=sample(c("b1", "b2"), 500, replace = TRUE))
+#' 
+#' ## A simple ungrouped scatter plot with a loess fit
+#' general.scatter(df)
+#' 
+#' ## A grouped scatter plot with a loess fit
+#' general.scatter(df, by="A")
+#' 
+#' ## An ungrouped scatter plot and a marker indicating the data variance
+#' general.scatter(df, fun="var")
+#' 
+#' ## Scatterplots with different regression fits
+#' # Linear Fit
+#' general.scatter(df, by="A", smooth.fun="lm")
+#' 
+#' ## Robust Linear Fit
+#' library(MASS)
+#' general.scatter(df, by="A", smooth.fun="rlm")
+#' 
+#' ## User defined polynomial fit
+#' # Degree = 1 resulting in a linear fit
+#' general.scatter(df, smooth.fun="glm", smooth.formula=y ~ poly(x, 1)) 
+#' # Degree = 2 resulting in a quadratic fit
+#' general.scatter(df, smooth.fun="glm", smooth.formula=y ~ poly(x, 2))
+#' 
+#' ## Equivalently for grouped scatterplots
+#' # Degree = 1 resulting in a linear fit
+#' general.scatter(df, by="A", smooth.fun="glm", smooth.formula=y ~ poly(x, 1)) 
+#' # Degree = 2 resulting in a quadratic fit
+#' general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2))
+#' }
+general.scatter <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                            title=NULL, xlab=NULL, ylab=NULL,
+                            legend.pos="none") {
+  
+  args <- list(data=data, by=by, fun=fun, 
+               smooth.fun=smooth.fun, smooth.formula=smooth.formula,
+               title=title, xlab=xlab, ylab=ylab,
+               legend.pos=legend.pos)
+  
+  fig <- NULL
+  
+  if(is.null(by)) {
+    fig <- do.call(general.scatter.simple, args)
+  } else {
+    fig <- do.call(general.scatter.facetted, args)
+  }
+  
+  return(fig)
+}
