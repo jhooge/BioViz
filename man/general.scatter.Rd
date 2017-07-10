@@ -42,6 +42,8 @@ smooth function or a custom model, defined by smooth.formula.
 }
 \examples{
 \dontrun{
+x <- rnorm(500)
+y <- rnorm(500)+x^2
 df <- data.frame(x=x, y=y, 
                  A=sample(c("a1", "a2"), 500, replace = TRUE),
                  B=sample(c("b1", "b2"), 500, replace = TRUE))

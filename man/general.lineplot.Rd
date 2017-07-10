@@ -69,4 +69,7 @@ general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon")
 general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon", y.log10trans = T)
 }
 }
+\author{
+Jens Hooge
+}
 

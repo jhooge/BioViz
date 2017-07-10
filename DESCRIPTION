@@ -8,10 +8,12 @@ Description: This package includes various visualization functions for the day
     to day use in the biomarker subgroup in RCSS.
 Imports:
     KernSmooth,
+    GGally,
     ggplot2,
     ggrepel,
     dplyr,
-    ellipse
+    ellipse,
+    psych
 Suggests:
     reshape2,
     MASS

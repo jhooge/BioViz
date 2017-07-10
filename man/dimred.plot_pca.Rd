@@ -4,12 +4,32 @@
 \alias{dimred.plot_pca}
 \title{Function to plot components from PCA (Principal Component Analysis)}
 \usage{
-dimred.plot_pca()
+dimred.plot_pca(df, label = NULL, ncomp = 3)
+}
+\arguments{
+\item{df}{The principal component matrix variable by component (data.frame)}
+
+\item{label}{Nector by which the data points should be labeled (numeric, character or factor)}
+
+\item{ncomp}{The number of components theat should be plotted against each other (integer)}
 }
 \value{
-Not implemented yet!
+A pairs plot (ggplot2) of principal components
 }
 \description{
-Function to plot components from PCA (Principal Component Analysis)
+The function returns a pairs plot of a user defined
+number of components, that can also be colored by a label if available.
+
+\itemize{
+  \item{"Lower Diagonal"}{The lower diagonal shows the data points 
+                          projected to the respective two dimensional 
+                          component space.}
+  \item{"Upper Diagonal"}{The upper diagonal shows a contour plot of the data
+                          projected the respective two dimensional component space.}
+  \item{"Diagonal"}{The diagonal shows a density plot of the projection of variables
+                    to a principal component axis.}
+ }
+The lower diagonal fo the pais plot shows the projected data points to the
+respective component space.
 }
 

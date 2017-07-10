@@ -1103,6 +1103,8 @@ general.scatter_by <- function(x, y, by=NULL, col.by=1:length(unique(by)), name.
 #' Custom geom for general.lineplot
 #'
 #' @keywords internal
+#' 
+#' @author Jens Hooge
 #'
 #' @seealso ggplot2::layer
 #'
@@ -1154,6 +1156,8 @@ geom_variability <- function(mapping = NULL, data = NULL, var.type=c("errorbar",
 
 
 #' Function generate (non-)facetted lineplot
+#' 
+#' @author Jens Hooge
 #'
 #' @param data A data frame in long format (Required)
 #' @param by Variable the plot should be facetted by (Default: NULL)
@@ -1337,8 +1341,6 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
 #' This function provides the option for different regression fits, based on an inbuilt
 #' smooth function or a custom model, defined by smooth.formula.
 #'
-#' 
-#'
 #' @param data A dataframe with at least three columns (x,y and a facetting variable) (Required)
 #' @param by Grouping variable (Required)
 #' @param fun Function for statistical aggregation function (Default: "mean") 
@@ -1358,6 +1360,8 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
 #' 
 #' @examples
 #' \dontrun{
+#' x <- rnorm(500)
+#' y <- rnorm(500)+x^2
 #' df <- data.frame(x=x, y=y, 
 #'                  A=sample(c("a1", "a2"), 500, replace = TRUE),
 #'                  B=sample(c("b1", "b2"), 500, replace = TRUE))
