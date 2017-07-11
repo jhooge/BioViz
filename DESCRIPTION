@@ -6,7 +6,17 @@ Author: Jens Hooge
 Maintainer: Jens Hooge <jens.hooge@bayer.com>
 Description: This package includes various visualization functions for the day
     to day use in the biomarker subgroup in RCSS.
-Imports: KernSmooth, ggplot2, ggrepel, dplyr
+Imports:
+    KernSmooth,
+    GGally,
+    ggplot2,
+    ggrepel,
+    dplyr,
+    ellipse,
+    psych
+Suggests:
+    reshape2,
+    MASS
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
