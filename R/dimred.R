@@ -53,20 +53,11 @@ dimred.plot_pca <- function(df, label=NULL, ncomp=3) {
     components <- cbind(label, components)
     colnames(components)[1] <- "Label"
     fig <- ggpairs(data=components, aes(color=Label),
-                   legends=TRUE,
                    columns=2:ncol(components),
                    lower=list(continuous=wrap("points", alpha= .5)),
                    upper=list(continuous=wrap("density", alpha = .5)),
                    diag=list(continuous=wrap("densityDiag", alpha = .5)))
   }
-  
-  
-  fig <- fig + 
-    theme_bw() +
-    theme(axis.title = element_text(size = 10), 
-          axis.text = element_text(size = 8), 
-          legend.title = element_blank())
-  
   return(fig)
 }
 

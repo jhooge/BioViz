@@ -1259,6 +1259,7 @@ general.lineplot <- function(data, by=NULL, facet.rows=1,
 #'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
 #'                   but is O(n^2) in memory, so does not work for larger datasets.
 #' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param density Display density contour (Default: FALSE)
 #' @param title Plot Title (Default: NULL)
 #' @param xlab x-axis label (Default: NULL)
 #' @param ylab y-axis label (Default: NULL)
@@ -1266,6 +1267,7 @@ general.lineplot <- function(data, by=NULL, facet.rows=1,
 #' 
 #' @return ggplot2 figure
 general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                                     density=FALSE,
                                      title=NULL, xlab=NULL, ylab=NULL,
                                      legend.pos="none") {
   xagg <- aggregate(cbind(data$x, data$y), by=list(data[, by]), fun)
@@ -1284,6 +1286,14 @@ general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", sm
       ylab(ylab) + 
       theme_bw() +
       theme(legend.position = legend.pos)
+  
+  if(density) {
+    fig <- fig + stat_density2d(aes(fill=..level..,alpha=..level..),
+                                geom='polygon',colour='black') + 
+      scale_fill_continuous(low="green", high="red") +
+      guides(alpha="none")
+  }
+  
   return(fig)
 }
 
@@ -1302,6 +1312,7 @@ general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", sm
 #'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
 #'                   but is O(n^2) in memory, so does not work for larger datasets.
 #' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param density Display density contour (Default: FALSE)
 #' @param title Plot Title (Default: NULL)
 #' @param xlab x-axis label (Default: NULL)
 #' @param ylab y-axis label (Default: NULL)
@@ -1309,6 +1320,7 @@ general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", sm
 #' 
 #' @return ggplot2 figure
 general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                                   density=FALSE,
                                    title=NULL, xlab=NULL, ylab=NULL,
                                    legend.pos="none") {
   xagg <- apply(data[, c("x", "y")], 2, fun, na.rm=T)
@@ -1328,6 +1340,14 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
     ylab(ylab) + 
     theme_bw() +
     theme(legend.position = legend.pos)
+  
+  if(density) {
+    fig <- fig + stat_density2d(aes(fill=..level..,alpha=..level..),
+                                geom='polygon',colour='black') + 
+      scale_fill_continuous(low="green", high="red") +
+      guides(alpha="none")
+  }
+  
   return(fig)
 }
 
@@ -1350,6 +1370,7 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
 #'                   formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appearance, 
 #'                   but is O(n^2) in memory, so does not work for larger datasets.
 #' @param smooth.formula Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)
+#' @param density Display density contour (Default: FALSE)
 #' @param title Plot Title (Default: NULL)
 #' @param xlab x-axis label (Default: NULL)
 #' @param ylab y-axis label (Default: NULL)
@@ -1394,12 +1415,18 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
 #' general.scatter(df, by="A", smooth.fun="glm", smooth.formula=y ~ poly(x, 1)) 
 #' # Degree = 2 resulting in a quadratic fit
 #' general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2))
+#' 
+#' ## Including a density contour
+#' general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2),
+#'                 density=T, legend.pos="bottom")
 #' }
 general.scatter <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
+                            density=FALSE,
                             title=NULL, xlab=NULL, ylab=NULL,
                             legend.pos="none") {
   
   args <- list(data=data, by=by, fun=fun, 
+               density=density,
                smooth.fun=smooth.fun, smooth.formula=smooth.formula,
                title=title, xlab=xlab, ylab=ylab,
                legend.pos=legend.pos)
