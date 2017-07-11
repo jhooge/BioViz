@@ -560,7 +560,7 @@ library(ggplot2)
 #'                  B=sample(c("b1", "b2"), n, replace=T),
 #'                  C=sample(c("c1", "c2", "c3"), n, replace=T),
 #'                  D=sample(c("d1", "d2", "d3"), n, replace=T),
-#'                  value=log(rnorm(n, 100, 1)))
+#'                  value=rnorm(n, 100, 1))
 #' 
 #' box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
 #'                   col.jitter_by = "A",
@@ -568,7 +568,7 @@ library(ggplot2)
 box_plot_facetted <- function(data, group_by1, group_by2, 
                               col.jitter_by=NULL, shape_jitter_by=NULL,
                               title=NULL, xlab=NULL, ylab=NULL, legend=FALSE,
-                              rotate=FALSE) {
+                              rotate=FALSE, trans="identity") {
   
   ## Check Inputs
   stopifnot(group_by1 %in% colnames(data),
@@ -586,6 +586,7 @@ box_plot_facetted <- function(data, group_by1, group_by2,
     xlab(xlab) + 
     ylab(ylab) + 
     facet_grid(facet) + 
+    scale_y_continuous(trans=trans) +
     theme_bw()
   
   if(!legend) {
@@ -597,3 +598,30 @@ box_plot_facetted <- function(data, group_by1, group_by2,
   
   return(fig)
 }
+
+
+group_by1 <- "A"
+group_by2 <- "B"
+col.jitter_by <- "A"
+shape_jitter_by <- "C"
+facet <- paste0("~", group_by2)
+
+ggplot(df, aes(x=factor(A), y=log10(value))) + 
+  geom_boxplot() +
+  # stat_boxplot(geom = "errorbar", width = 0.5, linetype="dashed") +
+  # stat_summary(fun.y=mean, colour="black", geom="point", 
+  #              shape=3, size=5, show.legend = FALSE) +
+  # geom_jitter(aes_string(shape=shape_jitter_by, 
+  #                        col=col.jitter_by), alpha=.7) +
+  facet_grid("~B") + 
+  scale_y_continuous(breaks=waiver(), trans='exp') +
+  theme_bw()
+
+ggplot(mtcars, aes(x = factor(gear), y = disp)) + 
+  geom_boxplot() +
+  facet_grid("~cyl") +
+  scale_y_continuous(trans='log') +
+  theme_bw()
+
+
+
