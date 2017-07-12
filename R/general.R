@@ -1418,7 +1418,7 @@ general.scatter.simple <- function(data, by=NULL, fun="mean", smooth.fun="auto",
 #' 
 #' ## Including a density contour
 #' general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2),
-#'                 density=T, legend.pos="bottom")
+#'                 density=T, legend.pos="")
 #' }
 general.scatter <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth.formula=y ~ x,
                             density=FALSE,
