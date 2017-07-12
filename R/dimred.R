@@ -26,7 +26,7 @@
 #' @export
 #'
 #' @param df The principal component matrix variable by component (data.frame)
-#' @param label Nector by which the data points should be labeled (numeric, character or factor)
+#' @param label Vector by which the data points should be labeled (numeric, character or factor)
 #' @param ncomp The number of components theat should be plotted against each other (integer)
 #'
 #' @import GGally
@@ -43,7 +43,7 @@
 #' ## Default Pairs Plot of the First 3 Principal Components
 #' dimred.plot_pca(X)
 #' 
-#' ## Default Pairs Plot of the First 3 Principal Components Labeled by Class Vector
+## Default Pairs Plot of the First 3 Principal Components Labeled by Class Vector
 #' dimred.plot_pca(X, Y)
 #' 
 #' ## Varying the Number of Components
@@ -72,7 +72,7 @@ dimred.plot_pca <- function(df, label=NULL, ncomp=3) {
     
     components <- cbind(label, components)
     colnames(components)[1] <- "Label"
-    fig <- ggpairs(data=components, aes(color=Label),
+    fig <- ggpairs(data=components, aes_string(color="Label"),
                    columns=2:ncol(components),
                    lower=list(continuous=wrap("points", alpha= .5)),
                    upper=list(continuous=wrap("density", alpha = .5)),

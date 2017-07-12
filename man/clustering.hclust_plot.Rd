@@ -12,4 +12,3 @@ Not implemented yet!
 \description{
 Function to plot a heatmap with hirarchical clustering
 }
-

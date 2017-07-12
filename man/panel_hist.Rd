@@ -21,4 +21,3 @@ Plot histogram into diagonal panel of a numeric vector
 Jens Hooge
 }
 \keyword{internal}
-

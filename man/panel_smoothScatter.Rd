@@ -35,4 +35,3 @@ with a loess fit.
 Jens Hooge
 }
 \keyword{internal}
-

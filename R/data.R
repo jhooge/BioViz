@@ -16,7 +16,7 @@
 "iPSC"
 
 #' Classification Data with Five Classes
-#'
+#' 
 #' This dataset includes benchmark data of five classes for the benchmarking of 
 #' classification models.
 #' It includes 250 samples and 15 variables and an additional label

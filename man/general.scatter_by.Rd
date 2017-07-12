@@ -89,4 +89,3 @@ general.scatter_by(x, y, by=by, col.by=c('skyblue','tomato'), name.by="Sex",
 \author{
 Sebastian Voss, Adam Skubala
 }
-

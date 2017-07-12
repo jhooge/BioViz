@@ -5,8 +5,8 @@
 \title{Function factory to generate a scatter plots}
 \usage{
 general.scatter(data, by = NULL, fun = "mean", smooth.fun = "auto",
-  smooth.formula = y ~ x, title = NULL, xlab = NULL, ylab = NULL,
-  legend.pos = "none")
+  smooth.formula = y ~ x, density = FALSE, title = NULL, xlab = NULL,
+  ylab = NULL, legend.pos = "none")
 }
 \arguments{
 \item{data}{A dataframe with at least three columns (x,y and a facetting variable) (Required)}
@@ -22,6 +22,8 @@ formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appear
 but is O(n^2) in memory, so does not work for larger datasets.}
 
 \item{smooth.formula}{Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)}
+
+\item{density}{Display density contour (Default: FALSE)}
 
 \item{title}{Plot Title (Default: NULL)}
 
@@ -76,9 +78,12 @@ general.scatter(df, smooth.fun="glm", smooth.formula=y ~ poly(x, 2))
 general.scatter(df, by="A", smooth.fun="glm", smooth.formula=y ~ poly(x, 1)) 
 # Degree = 2 resulting in a quadratic fit
 general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2))
+
+## Including a density contour
+general.scatter(df, by="B", smooth.fun="glm", smooth.formula=y ~ poly(x, 2),
+                density=T, legend.pos="bottom")
 }
 }
 \author{
 Jens Hooge
 }
-

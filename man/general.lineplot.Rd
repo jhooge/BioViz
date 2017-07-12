@@ -61,15 +61,23 @@ df <- data.frame(Dose1=exp((1/2)*1:n),
 df <- melt(df, id=c("Visit"))
 colnames(df) <- c("Visit", "Dose", "Measure") 
 
+## Lineplot with Errorbars
 general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar")
+
+## Lineplot with Errorbars and log transformed y axis
 general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar", y.log10trans = T)
+
+## Facetted Lineplot
 general.lineplot(df, by="Dose", facet.row=3, upper.err=1, lower.err=1, 
                  var.type="errorbar", y.log10trans = T)
+                 
+## Lineplot with Error Ribbon 
 general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon")
+
+## Lineplot with Error Ribbon and log transformed y-axis
 general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon", y.log10trans = T)
 }
 }
 \author{
 Jens Hooge
 }
-

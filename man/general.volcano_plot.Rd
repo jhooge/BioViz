@@ -60,4 +60,3 @@ general.volcano_plot(iPSC, top_labeled=10, log1p=TRUE)
 \author{
 Jens Hooge
 }
-

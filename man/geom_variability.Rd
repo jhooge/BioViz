@@ -52,11 +52,10 @@ ggplot2 layer
 \description{
 Custom geom for general.lineplot
 }
-\author{
-Jens Hooge
-}
 \seealso{
 ggplot2::layer
 }
+\author{
+Jens Hooge
+}
 \keyword{internal}
-

@@ -27,4 +27,3 @@ Function to transform x and y coordinates
 Sebastian Voss, Adam Skubala
 }
 \keyword{internal}
-

@@ -12,4 +12,3 @@ Not implemented yet!
 \description{
 Function for a time series plot
 }
-

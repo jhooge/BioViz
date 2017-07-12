@@ -12,4 +12,3 @@ Not implemented yet!
 \description{
 Function to plot ROC (Receiver Operating Characteristic) Curve
 }
-
