@@ -949,6 +949,7 @@ general.hist_log <- function(x, by=NULL, file.name, nbars=15, title='', xlab='',
 #'
 #' @return PNG files with the scatterplot ('file.name.png')
 #'     numeric vector with size of the PNG-file in inches for rescaling in RTF
+#'     
 #' @export
 #'
 #' @examples
