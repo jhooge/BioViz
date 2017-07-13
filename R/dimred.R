@@ -103,7 +103,6 @@ pca2dPlot <- function(X, label) {
 #'
 #' @return Not implemented yet!
 #' @export
-
 dimred.plot_mca <- function() {
   stop("Not implemented yet!")
 }
