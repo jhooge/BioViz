@@ -2,14 +2,14 @@
 
 #' Function to plot components from PCA (Principal Component Analysis)
 #' 
+#' @TODO Figure out how to print a single legend with class labels
+#'       Currently the legend is positioned for every plot in the 
+#'       grid.
+#' 
 #' @description The function returns a pairs plot of a user defined
 #' number of components, that can also be colored by a label if available.
 #' Be aware that the function also centers and scales the data before 
 #' computing the principal component analysis.
-#' 
-#' TODO: Figure out how to print a single legend with class labels
-#'       Currently the legend is positioned for every plot in the 
-#'       grid.
 #' 
 #' \itemize{
 #'   \item{"Lower Diagonal"}{The lower diagonal shows the data points 

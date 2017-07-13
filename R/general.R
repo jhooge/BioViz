@@ -620,12 +620,15 @@ general.box_plot_facetted <- function(data, group_by1, group_by2,
 #' 
 #' @import ellipse
 #' 
+#' @TODO This function has to be refactored and the number of 
+#' input parameters have to be reduced.
+#' 
 #' @description 
 #' The upper diagonale of the correlation matrix is visualized by colored ellipses,
 #' with the color, shape and direction of the ellipsis showing the dependence of
 #' the respective variable pair. the lower diagonale of the matrix-like plot
 #' contains the corresponding correlation values.
-#'
+#' 
 #' @param data data set in wide format (Required)
 #' @param cor.type type of correlation coefficient, 'pearson', 'spearman' or 'kendall' (Default: 'spearman')
 #' @param col vector of length two with the colors for negative and positive correlations (Default: c('tomato1','green3'))
@@ -1299,7 +1302,7 @@ general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", sm
   
   if(density) {
     fig <- fig + stat_density2d(aes(fill=..level..,alpha=..level..),
-                                geom='polygon',colour='black') + 
+                                geom='polygon',colour='black') +
       scale_fill_continuous(low="green", high="red") +
       guides(alpha="none")
   }
