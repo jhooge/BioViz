@@ -74,4 +74,3 @@ general.corplot(data=mtcars, cor.type='pearson', disp.thresh=0.5, group.cut=4,
 \author{
 Sebastian Voss, Adam Skubala
 }
-

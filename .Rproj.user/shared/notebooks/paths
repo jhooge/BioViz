@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /gpfs01/home/gebkh/workspace/R/projects/BayesianSampleSize/server.R="CC7F1D9A"
 /gpfs01/home/gebkh/workspace/R/projects/BioViz/DESCRIPTION="C347721D"
 /gpfs01/home/gebkh/workspace/R/projects/BioViz/NAMESPACE="C19FA690"
@@ -9,3 +10,7 @@
 /gpfs01/home/gebkh/workspace/R/shinyApps/Adepro/inst/doc/Adepro.Rmd="5E5D3136"
 /gpfs01/home/gebkh/workspace/R/shinyApps/GraphGallery/server.R="F9C45854"
 /gpfs01/home/gebkh/workspace/R/shinyApps/GraphGallery/ui.R="EFEE8E71"
+=======
+/Users/jhooge/workspace/R/BioViz/man/BioViz-package.Rd="945EB651"
+/Users/jhooge/workspace/R/BioViz/man/iPSC.Rd="4367767C"
+>>>>>>> c73bb413d1d802337f4b75d1bcd2f7c54f2fa5b6

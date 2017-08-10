@@ -47,4 +47,3 @@ general.hist_log(x=x, by=by, file.name='test_hist',
 \author{
 Sebastian Voss, Adam Skubala
 }
-

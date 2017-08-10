@@ -53,4 +53,3 @@ general.box_plot_facetted(df, group_by1 = "A", group_by2 = "B",
 \author{
 Jens Hooge
 }
-

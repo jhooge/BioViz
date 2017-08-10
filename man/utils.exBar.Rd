@@ -21,4 +21,3 @@ Function to dictate the exact number of bars in a histogram
 Sebastian Voss, Adam Skubala
 }
 \keyword{internal}
-

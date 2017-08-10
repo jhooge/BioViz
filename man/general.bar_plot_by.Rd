@@ -116,4 +116,3 @@ general.bar_plot_by(freq=table(x), labels.ab=paste0('X', 1:15),
 \author{
 Sebastian Voss, Adam Skubala
 }
-

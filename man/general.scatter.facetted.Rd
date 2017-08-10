@@ -5,8 +5,8 @@
 \title{Function to generate a facetted scatter plot}
 \usage{
 general.scatter.facetted(data, by, fun = "mean", smooth.fun = "auto",
-  smooth.formula = y ~ x, title = NULL, xlab = NULL, ylab = NULL,
-  legend.pos = "none")
+  smooth.formula = y ~ x, density = FALSE, title = NULL, xlab = NULL,
+  ylab = NULL, legend.pos = "none")
 }
 \arguments{
 \item{data}{A dataframe with at least three columns (x,y and a facetting variable) (Required)}
@@ -22,6 +22,8 @@ formula = y ~ s(x, bs = "cs"). Somewhat anecdotally, loess gives a better appear
 but is O(n^2) in memory, so does not work for larger datasets.}
 
 \item{smooth.formula}{Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x) (Default: y ~ x)}
+
+\item{density}{Display density contour (Default: FALSE)}
 
 \item{title}{Plot Title (Default: NULL)}
 
@@ -41,4 +43,3 @@ Function to generate a facetted scatter plot
 Jens Hooge
 }
 \keyword{internal}
-

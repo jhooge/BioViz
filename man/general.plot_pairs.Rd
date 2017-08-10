@@ -28,10 +28,9 @@ general.plot_pairs(iris[, 1:4])
 }
 
 }
-\author{
-Jens Hooge
-}
 \seealso{
 pairs
 }
-
+\author{
+Jens Hooge
+}

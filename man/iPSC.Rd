@@ -25,4 +25,3 @@ derived by Stephen Turner from the GEO GSE52202 dataset by aligning it to hg19
 and analysing it with DESeq2.
 }
 \keyword{datasets}
-

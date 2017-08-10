@@ -12,4 +12,3 @@ Not implemented yet!
 \description{
 Function to plot components from t-SNE (t-Stochastic Neighbor Embedding)
 }
-

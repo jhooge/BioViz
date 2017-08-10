@@ -2,6 +2,10 @@
 
 #' Function to plot components from PCA (Principal Component Analysis)
 #' 
+#' @TODO Figure out how to print a single legend with class labels
+#'       Currently the legend is positioned for every plot in the 
+#'       grid.
+#' 
 #' @description The function returns a pairs plot of a user defined
 #' number of components, that can also be colored by a label if available.
 #' Be aware that the function also centers and scales the data before 
@@ -22,13 +26,29 @@
 #' @export
 #'
 #' @param df The principal component matrix variable by component (data.frame)
-#' @param label Nector by which the data points should be labeled (numeric, character or factor)
+#' @param label Vector by which the data points should be labeled (numeric, character or factor)
 #' @param ncomp The number of components theat should be plotted against each other (integer)
 #'
 #' @import GGally
 #' @import ggplot2
 #'
 #' @return A pairs plot (ggplot2) of principal components
+#' 
+#' @examples 
+#' \dontrun{
+#' data(fiveClass)
+#' Y <- fiveClass$Class
+#' X <- fiveClass[, 2:ncol(fiveClass)]
+#' 
+#' ## Default Pairs Plot of the First 3 Principal Components
+#' dimred.plot_pca(X)
+#' 
+## Default Pairs Plot of the First 3 Principal Components Labeled by Class Vector
+#' dimred.plot_pca(X, Y)
+#' 
+#' ## Varying the Number of Components
+#' dimred.plot_pca(X, Y, ncomp=5)
+#' }
 dimred.plot_pca <- function(df, label=NULL, ncomp=3) {
   
   stopifnot(ncomp >= 2)
@@ -52,7 +72,7 @@ dimred.plot_pca <- function(df, label=NULL, ncomp=3) {
     
     components <- cbind(label, components)
     colnames(components)[1] <- "Label"
-    fig <- ggpairs(data=components, aes(color=Label),
+    fig <- ggpairs(data=components, aes_string(color="Label"),
                    columns=2:ncol(components),
                    lower=list(continuous=wrap("points", alpha= .5)),
                    upper=list(continuous=wrap("density", alpha = .5)),
@@ -60,44 +80,6 @@ dimred.plot_pca <- function(df, label=NULL, ncomp=3) {
   }
   return(fig)
 }
-
-pca2dPlot <- function(X, label) {
-  Y <- X[, label]
-  X <- X[, -which(names(X) == label)]
-  
-  X_projected <- pcaTransform(X)
-  # preProc   = preProcess(X, method=c("center", "scale", "pca"))
-  # X_projected = predict(preProc, X)[, 1:3] # PCA projection
-  
-  projection <- data.frame(Label=Y,
-                           PC1=X_projected[, 1], 
-                           PC2=X_projected[, 2],
-                           PC3=X_projected[, 3])
-  
-  tools <- c("pan", "resize", 
-             "wheel_zoom", "box_zoom", 
-             "box_select", "lasso_select", 
-             "reset", "save")
-  
-  cols <- 2:ncol(projection)
-  nms <- expand.grid(names(projection)[cols], 
-                     rev(names(projection)[cols]), 
-                     stringsAsFactors = FALSE)
-  
-  splom_list <- vector("list", 9)
-  for(ii in seq_len(nrow(nms))) {
-    splom_list[[ii]] <- figure(width = 200, height = 200, tools = tools,
-                               xlab = nms$Var1[ii], ylab = nms$Var2[ii]) %>%
-      ly_points(nms$Var1[ii], nms$Var2[ii], 
-                data = projection,
-                color = Label, 
-                size = 6, 
-                hover=list(Label),
-                legend = FALSE)
-  }
-  grid_plot(splom_list, ncol = 3, same_axes = TRUE, link_data = TRUE)
-}
-
 
 #' Function to plot components from MCA (Multiple Correspondence Analysis)
 #'

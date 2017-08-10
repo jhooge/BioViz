@@ -620,12 +620,15 @@ general.box_plot_facetted <- function(data, group_by1, group_by2,
 #' 
 #' @import ellipse
 #' 
+#' @TODO This function has to be refactored and the number of 
+#' input parameters have to be reduced.
+#' 
 #' @description 
 #' The upper diagonale of the correlation matrix is visualized by colored ellipses,
 #' with the color, shape and direction of the ellipsis showing the dependence of
 #' the respective variable pair. the lower diagonale of the matrix-like plot
 #' contains the corresponding correlation values.
-#'
+#' 
 #' @param data data set in wide format (Required)
 #' @param cor.type type of correlation coefficient, 'pearson', 'spearman' or 'kendall' (Default: 'spearman')
 #' @param col vector of length two with the colors for negative and positive correlations (Default: c('tomato1','green3'))
@@ -949,6 +952,7 @@ general.hist_log <- function(x, by=NULL, file.name, nbars=15, title='', xlab='',
 #'
 #' @return PNG files with the scatterplot ('file.name.png')
 #'     numeric vector with size of the PNG-file in inches for rescaling in RTF
+#'     
 #' @export
 #'
 #' @examples
@@ -1193,11 +1197,20 @@ geom_variability <- function(mapping = NULL, data = NULL, var.type=c("errorbar",
 #' df <- melt(df, id=c("Visit"))
 #' colnames(df) <- c("Visit", "Dose", "Measure") 
 #' 
+#' ## Lineplot with Errorbars
 #' general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar")
+#' 
+#' ## Lineplot with Errorbars and log transformed y axis
 #' general.lineplot(df, upper.err=1, lower.err=1, var.type="errorbar", y.log10trans = T)
+#' 
+#' ## Facetted Lineplot
 #' general.lineplot(df, by="Dose", facet.row=3, upper.err=1, lower.err=1, 
 #'                  var.type="errorbar", y.log10trans = T)
+#'                  
+#' ## Lineplot with Error Ribbon 
 #' general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon")
+#' 
+#' ## Lineplot with Error Ribbon and log transformed y-axis
 #' general.lineplot(df, by="Dose", upper.err=1, lower.err=1, var.type="ribbon", y.log10trans = T)
 #' }
 general.lineplot <- function(data, by=NULL, facet.rows=1,
@@ -1289,7 +1302,7 @@ general.scatter.facetted <- function(data, by, fun="mean", smooth.fun="auto", sm
   
   if(density) {
     fig <- fig + stat_density2d(aes(fill=..level..,alpha=..level..),
-                                geom='polygon',colour='black') + 
+                                geom='polygon',colour='black') +
       scale_fill_continuous(low="green", high="red") +
       guides(alpha="none")
   }

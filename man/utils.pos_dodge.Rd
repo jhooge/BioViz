@@ -21,4 +21,3 @@ Function for position dodging in a plot
 Sebastian Voss, Adam Skubala
 }
 \keyword{internal}
-
