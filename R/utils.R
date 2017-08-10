@@ -63,3 +63,17 @@ utils.pos_dodge <- function(x, width=0.1){
   }
   return(x)
 }
+
+
+#' Gets the label for a caret model
+#' 
+#' @param model A trained caret model (train or rfe)
+#'
+#' @return A human readable model label (character)
+utils.get_label <- function(model) {
+  label <- model$fit$modelInfo$label
+  if (is.null(label)) {
+    label <- model$modelInfo$label
+  }
+  return(label)
+}

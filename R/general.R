@@ -1441,3 +1441,65 @@ general.scatter <- function(data, by=NULL, fun="mean", smooth.fun="auto", smooth
   
   return(fig)
 }
+
+
+#' Function to plot the skewness of of the input data
+#' 
+#' @import e1071
+#'
+#' @param data Input data in form of a numeric vector or a data.frame
+#'
+#' @return A ggplot figure
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' ## Bar plot for data with small number of variables (<=50)
+#' set.seed(42)
+#' n <- 100 ## number of samples
+#' m <- 10 ## number of variables
+#' alpha <- runif(m, 0, 100)
+#' beta <- runif(m, 0, 100)
+#' data <- as.data.frame(mapply(rbeta, n1, alpha, beta))
+#' general.skewness(data)
+#' 
+#' ## Density plot for data with large naumber of variables (>50)
+#' set.seed(42)
+#' n <- 100 ## number of samples
+#' m <- 50 ## number of variables
+#' alpha <- runif(m, .1, 100)
+#' beta <- runif(m, .1, 100)
+#' data <- as.data.frame(mapply(rbeta, n, alpha, beta))
+#' general.skewness(data)
+#' }
+general.skewness <- function(data) {
+  X <- as.data.frame(data) ## in case it is just a numeric vector
+  skewValues <- as.data.frame(sapply(X, skewness, na.rm=TRUE, type=1))
+  skewValues$variable <- rownames(skewValues)
+  rownames(skewValues) <- NULL
+  colnames(skewValues) <- c("skewnessValue", "variable")
+  skewValues$variable <- as.factor(skewValues$variable)
+  
+  if (ncol(X) < 50){
+    fig <- ggplot(skewValues, aes(x=variable, y=skewnessValue)) +
+      geom_bar(stat="identity", position="dodge") +
+      geom_hline(yintercept = 2, linetype = "dashed", color="red") +
+      geom_hline(yintercept = -2, linetype = "dashed", color="red") +
+      ylab(NULL) +
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))
+  } else {
+    fig <- ggplot(skewValues, aes(x=skewnessValue)) +
+      geom_density() +
+      geom_point(aes(x=skewnessValue, y = 0.0005),
+                 alpha = 0.25, size=4, colour="darkgray") +
+      geom_vline(xintercept = 2, linetype = "dashed", color="red") +
+      geom_vline(xintercept = -2, linetype = "dashed", color="red") +
+      annotate("text", x = Inf, y = Inf, label = sprintf("n=%i", ncol(X)),
+               vjust=1.8, hjust=1.2) +
+      xlab(NULL) +
+      ylab(NULL) +
+      theme_bw()
+  }
+  return(fig)
+}
